@@ -1,0 +1,79 @@
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {TournoiService} from '../../services/tournoi.service';
+import {Tournoi} from '../../models/tournoi.model';
+import {Subscription} from 'rxjs';
+import {Ronde} from '../../models/ronde.model';
+import {RondeService} from '../../services/ronde.service';
+
+@Component({
+  selector: 'app-liste-tournois',
+  templateUrl: './liste-tournois.component.html',
+  styleUrls: ['./liste-tournois.component.scss']
+})
+export class ListeTournoisComponent implements OnInit, OnDestroy {
+
+  tournois: Tournoi[] ;
+  tournoiSubscription: Subscription ;
+
+  rondes: Ronde[] ;
+  rondeSubscription: Subscription ;
+
+  constructor(private tournoiService: TournoiService,
+              private rondeService: RondeService ,
+              private router: Router) { }
+
+  ngOnInit(): void {
+    this.tournoiSubscription = this.tournoiService.tournoisSubject.subscribe(
+      (tournois: Tournoi[]) => {
+        this.tournois = tournois ;
+      }
+    );
+    this.tournoiService.getTournois() ;
+    this.tournoiService.emitTournois() ;
+
+    this.rondeSubscription = this.rondeService.rondeSubject.subscribe(
+      (rondes: Ronde[]) => {
+        this.rondes = rondes ;
+      }
+    );
+    this.tournoiService.getTournois() ;
+    this.tournoiService.emitTournois() ;
+    this.rondeService.getRondes() ;
+    this.rondeService.emitRondes() ;
+  }
+
+  onNewTournoi() {
+  this.router.navigate(['/creertournoi']) ;
+  }
+
+  onDeleteTournoi(tournoi: Tournoi) {
+    let rondeADelete: Ronde ;
+    let found = false ;
+
+    for (let i = 0 ; i < this.rondes.length ; i++)
+    {
+      if (this.rondes[i].tournament === tournoi.tournamentName)
+      {
+        found = true ;
+        rondeADelete = this.rondes[i] ;
+      }
+
+      if (found === true) { this.rondeService.deleteRonde(rondeADelete) ; }
+    }
+
+    this.tournoiService.supprimerTournoi(tournoi) ;
+  }
+
+  onOpenTournoi(id: number) {
+    this.router.navigate(['/gerertournoi', id]) ;
+  }
+
+  ngOnDestroy() {
+    this.tournoiSubscription.unsubscribe() ;
+  }
+
+  onOpenRondes(id){
+    this.router.navigate(['gererronde', id]);
+  }
+}

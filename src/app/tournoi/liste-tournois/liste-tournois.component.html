@@ -1,0 +1,25 @@
+<div class="row">
+    <div class="col-xl-12">
+      <div class="list-group">
+        <div class="list-group-item" *ngFor="let tournoi of tournois ; let i = index">
+          <div class="row">
+            <h3 class="col-8">{{ tournoi.tournamentName }}</h3>
+            <div *ngIf="tournoi.isLive" class="col-4">Live !</div>
+            <div *ngIf="!tournoi.isLive" class="col-4">Off</div>
+          </div>
+          <p>{{ tournoi.format }}</p>
+          <p>Nombre de joueurs : {{ tournoi.registeredPlayers.length-1 }}</p>
+          <div class="row">
+            <div class="col">
+              <button class="btn btn-success" (click)="onOpenTournoi(i)">Ouvrir</button>
+              <button class="btn btn-success" (click)="onOpenRondes(i)" *ngIf="tournoi.isLive">Ronde en cours</button>
+            </div>
+            <div class="col">
+              <button class="btn btn-danger" (click)="onDeleteTournoi(tournoi)">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="onNewTournoi()">Créer un tournoi</button>
+    </div>
+</div>

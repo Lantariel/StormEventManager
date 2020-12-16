@@ -1,0 +1,15 @@
+<div class="row">
+  <div class="col-sm-8 col-sm-offset-2">
+    <form [formGroup]="tournoiForm" (ngSubmit)="onSaveTournament()">
+      <div class="form-group">
+        <label for="tournamentName">Nom du tournoi :</label>
+        <input type="text" class="form-control" id="tournamentName" formControlName="tournamentName">
+      </div>
+      <div class="form-group">
+        <label for="tournamentFormat">Format du tournoi :</label>
+        <input type="text" class="form-control" id="tournamentFormat" formControlName="tournamentFormat">
+      </div>
+      <button class="btn btn-primary" [disabled]="tournoiForm.invalid" type="submit">Envoyer</button>
+    </form>
+  </div>
+</div>

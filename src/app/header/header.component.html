@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">
+    <img src="assets/img/stormcrow.jpg" height="40">
+    S.T.O.R.M
+  </a>
+  <div class="navbar-toggler" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </div>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" routerLink="listejoueurs" *ngIf="isAuth" style="cursor:pointer">Joueurs locaux<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" routerLink="listetournois" *ngIf="isAuth" style="cursor:pointer">Liste des tournois<span class="sr-only">(current)</span></a>
+      </li>
+    </ul>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" routerLink="auth/signin" *ngIf="!isAuth" style="cursor:pointer">Se connecter<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" (click)="onSignOut()" *ngIf="isAuth" style="cursor:pointer">Se déconnecter<span class="sr-only">(current)</span></a>
+      </li>
+    </ul>
+  </div>
+</nav>
