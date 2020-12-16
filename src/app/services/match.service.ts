@@ -82,4 +82,8 @@ export class MatchService {
     this.saveMatches() ;
     this.emitMatches() ;
   }
+
+  deleteAllMatchs(id: number){
+
+  }
 }
