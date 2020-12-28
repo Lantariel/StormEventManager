@@ -121,6 +121,7 @@ export class TournoiService {
       this.tournois[id].registeredPlayers[i].score = 0 ;
       this.tournois[id].registeredPlayers[i].previousOpponents = [0] ;
       this.tournois[id].registeredPlayers[i].playerIndexInEvent = i ;
+      this.tournois[id].registeredPlayers[i].status = 'active' ;
     }
 
     this.tournois[id].registeredPlayers.splice(0, 1) ;
@@ -147,22 +148,24 @@ export class TournoiService {
     return Math.floor(Math.random() * (ceiling - floor + 1)) + floor;
   }
 
-  shuffleInPlace<T>(array: T[]): T[] {
+  shuffleInPlace(array: Joueur[]) {
+    let temp: Joueur ;
     // if it's 1 or 0 items, just return
     if (array.length <= 1) return array;
 
     // For each index in array
-    for (let i = 0; i < array.length; i++) {
-
+    for (let i = 0 ; i < array.length; i++)
+    {
       // choose a random not-yet-placed item to place there
       // must be an item AFTER the current item, because the stuff
       // before has all already been placed
       const randomChoiceIndex = this.getRandom(i, array.length - 1);
 
       // place our random choice in the spot by swapping
-      [array[i], array[randomChoiceIndex]] = [array[randomChoiceIndex], array[i]];
+      temp = array[i] ;
+      array[i] = array[randomChoiceIndex] ;
+      array[randomChoiceIndex] = temp ;
     }
-
     return array;
   }
 
@@ -174,6 +177,25 @@ export class TournoiService {
 
   upRondeEnCours(id: number) {
     this.tournois[id].rondeEnCours++ ;
+    this.saveTournoi() ;
+    this.emitTournois() ;
+  }
+
+  addNewRound(id: number, newRound: Ronde){
+    this.tournois[id].rondes.push(newRound) ;
+    this.saveTournoi() ;
+    this.emitTournois() ;
+  }
+
+  getplayersFromLastRound(tnId: number){
+    if (this.tournois[tnId].rondes.length === 1) // si on est à la première ronde
+      { return this.tournois[tnId].currentStanding ; }
+    else
+      { return this.tournois[tnId].rondes[this.tournois[tnId].rondes.length - 1].finalStandings ; }
+  }
+
+  updateRegisteredPlayers(tnId: number, joueurs: Joueur[]){
+    this.tournois[tnId].registeredPlayers = joueurs ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }

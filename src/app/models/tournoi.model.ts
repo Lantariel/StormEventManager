@@ -24,5 +24,6 @@ export class Tournoi {
     this.registeredPlayers = [] ;
     this.nombreDeRondes = 0 ;
     this.isFinished = false ;
+    this.rondes = [new Ronde(tournamentName, 0)] ;
   }
 }

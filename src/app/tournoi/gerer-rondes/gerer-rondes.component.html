@@ -1,31 +1,43 @@
-<div class="container">
-  <div class="row">
-    <!--
-    <div class="col">
-      <div *ngFor="let match of matchs ; let i = index">
-        <button class="btn btn-default"  (click)="setTablefocus(i)" onmouseover="this.style.color='#42c431'" onmouseout="this.style.color=''">
-          Table {{ i + 1 }} - {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} VS {{ match.joueur2.firstName }} {{ match.joueur2.lastName }}
-        </button>
+<div>
+<h3>Ronde {{ this.tournoi.rondeEnCours }}</h3>
+</div>
+<div class="row">
+  <button class="btn btn-success" *ngIf="!rondeActuelle.hasStarted" (click)="onStartMatches()">Créer des matchs</button>
+  <div class="col" *ngIf="this.rondeActuelle.currentMatches.length > 1" style="text-align: center; cursor: pointer;">
+    <button class="btn btn-primary" (click)="toogleDisplayMatches()" [ngClass]="{'hidden': displayFinishedMatches === false }">Cacher les matchs terminés</button>
+    <button class="btn btn-primary" (click)="toogleDisplayMatches()" [ngClass]="{'hidden': displayFinishedMatches === true }">Afficher les matchs terminés</button>
+    <button class="btn btn-success" (click)="onNextRound()" *ngIf="checkAllMatchesAreOver()">Ronde suivante</button>
+    <button *ngFor="let match of this.rondeActuelle.currentMatches ; let i = index" (click)="setFocusTable(i)" class="btn" [ngClass]="{'matchisover': match.scoreAlreadySubmitted === true, 'hidden': match.scoreAlreadySubmitted === true && displayFinishedMatches === false}">
+      <div>
+        <b>Table {{ i + 1}}</b>
+        <p>{{ match.joueur1.firstName }}  {{ match.joueur1.lastName }}  VS  {{ match.joueur2.firstName }}  {{ match.joueur2.lastName }}</p>
       </div>
-      <button class="btn btn-primary">Modifier les appareillements</button>
+      <hr/>
+    </button>
+  </div>
+
+  <div class="col" style="text-align: center;">
+    <b>Table {{ this.tableFocus + 1 }}</b>
+    <p>{{ this.rondeActuelle.currentMatches[this.tableFocus].joueur1.firstName }}  {{ this.rondeActuelle.currentMatches[this.tableFocus].joueur1.lastName }} Vs {{ this.rondeActuelle.currentMatches[this.tableFocus].joueur2.firstName }}  {{ this.rondeActuelle.currentMatches[this.tableFocus].joueur2.lastName }}</p>
+    <div *ngIf="this.rondeActuelle.currentMatches[this.tableFocus].scoreAlreadySubmitted">
+      <b>{{ this.rondeActuelle.currentMatches[this.tableFocus].scoreJ1 }}</b> - <b>{{ this.rondeActuelle.currentMatches[this.tableFocus].scoreJ2 }}</b>
     </div>
-    <div class="col" style="text-align: center;">
-      <h3>Table {{ this.focusTable + 1}}</h3>
-      <p><b>
-        {{ this.matchs[this.focusTable].joueur1.firstName }} {{ this.matchs[this.focusTable].joueur1.lastName }} VS {{ this.matchs[this.focusTable].joueur2.firstName }} {{ this.matchs[this.focusTable].joueur2.lastName }}
-      </b></p>
-      <form [formGroup]="formScores" (ngSubmit)="onSubmitScore(this.focusTable)">
-        <div class="form-group">
-          <input type="text" id="scorej1" formControlName="scorej1" style="width: 30px; margin: 15px;">
-          <input type="text" id="scorej2" formControlName="scorej2" style="width: 30px; margin: 15px;">
-        </div>
-        <button class="btn btn-success" type="submit">Enregistrer le score</button>
-      </form>
+    <form [formGroup]="formScores" (ngSubmit)="onUpdateScore()" style="margin-top: 10px;">
+    <div class="form-group">
+      <input id="scorej1" type="number" style="width: 50px; margin: 5px;" formControlName="scorej1">
+      <button class="btn btn-primary" type="submit">Valider score</button>
+      <input id="scorej2" type="number" style="width: 50px; margin: 5px;" formControlName="scorej2">
     </div>
-    <div class="col">
-      <h3>Classement actuel</h3>
-      <div *ngFor="let joueur of classement">{{ joueur.firstName }} {{ joueur.lastName }}  {{ joueur.score }} </div>
+    </form>
+  </div>
+
+  <div class="col">
+    <b>Résultats entrés :</b>
+    <hr/>
+    <div *ngFor="let match of this.rondeActuelle.currentMatches ; let i = index">
+      <div *ngIf="match.scoreAlreadySubmitted === true">
+        Table {{ i + 1 }} - {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} {{ match.scoreJ1 }} - {{ match.scoreJ2 }} {{ match.joueur2.firstName }} {{ match.joueur2.lastName }}
+      </div>
     </div>
-    -->
   </div>
 </div>
