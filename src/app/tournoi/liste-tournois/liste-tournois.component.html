@@ -8,7 +8,8 @@
             <div *ngIf="!tournoi.isLive" class="col-4">Off</div>
           </div>
           <p>{{ tournoi.format }}</p>
-          <p>Nombre de joueurs : {{ tournoi.registeredPlayers.length-1 }}</p>
+          <p *ngIf="!tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length - 1}}</p>
+          <p *ngIf="tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length }}</p>
           <div class="row">
             <div class="col">
               <button class="btn btn-success" (click)="onOpenTournoi(i)">Ouvrir</button>

@@ -24,6 +24,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import { GererRondesComponent } from './tournoi/gerer-rondes/gerer-rondes.component';
 import {VariablesGlobales} from './services/variablesGlobales';
 import {TournoiService} from './services/tournoi.service';
+import { GererJoueursComponent } from './tournoi/gerer-joueurs/gerer-joueurs.component';
 
 const appRoutes: Routes = [
   {path: 'auth/signup', component: SignupComponent},
@@ -50,7 +51,8 @@ const appRoutes: Routes = [
     GererTournoiComponent,
     JoueursLocauxComponent,
     CreerJoueurLocalComponent,
-    GererRondesComponent
+    GererRondesComponent,
+    GererJoueursComponent
   ],
     imports: [
         BrowserModule,

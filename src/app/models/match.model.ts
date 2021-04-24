@@ -12,12 +12,11 @@ export class Match {
   public joueur1: Joueur ; // Joueur 1 au sein du match
   public joueur2: Joueur ; // Joueur 2 au sein du match
 
-  constructor(jo1: Joueur, jo2: Joueur, tnName: string) {
+  constructor(jo1: Joueur, jo2: Joueur) {
     this.scoreAlreadySubmitted = false ;
     this.scoreJ1 = 0 ;
     this.scoreJ2 = 0 ;
     this.joueur1 = jo1 ;
     this.joueur2 = jo2 ;
-    this.tournamentName = tnName ; // Id du tournoi passée en paramètre
   }
 }

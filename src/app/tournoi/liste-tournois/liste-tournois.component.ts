@@ -31,16 +31,6 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
     );
     this.tournoiService.getTournois() ;
     this.tournoiService.emitTournois() ;
-
-    this.rondeSubscription = this.rondeService.rondeSubject.subscribe(
-      (rondes: Ronde[]) => {
-        this.rondes = rondes ;
-      }
-    );
-    this.tournoiService.getTournois() ;
-    this.tournoiService.emitTournois() ;
-    this.rondeService.getRondes() ;
-    this.rondeService.emitRondes() ;
   }
 
   onNewTournoi() {
@@ -48,20 +38,6 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
   }
 
   onDeleteTournoi(tournoi: Tournoi) {
-    let rondeADelete: Ronde ;
-    let found = false ;
-
-    for (let i = 0 ; i < this.rondes.length ; i++)
-    {
-      if (this.rondes[i].tournament === tournoi.tournamentName)
-      {
-        found = true ;
-        rondeADelete = this.rondes[i] ;
-      }
-
-      if (found === true) { this.rondeService.deleteRonde(rondeADelete) ; }
-    }
-
     this.tournoiService.supprimerTournoi(tournoi) ;
   }
 

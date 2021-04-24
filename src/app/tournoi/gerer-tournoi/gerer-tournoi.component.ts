@@ -22,6 +22,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
 
   currentTournamentIndex: number ; // Index dans la base du tournoi en cours
   forceRoundNumber: number = null ; // Permet de forcer le nombre de rondes
+  nombreDeJoueurs: number ;
 
 /* === Récuperation des données des joueurs et des tournois === */
 
@@ -44,7 +45,6 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute,
               private tournoiService: TournoiService,
               private joueurService: JoueurService,
-              private rondeService: RondeService,
               private formBuilder: FormBuilder,
               private router: Router) { }
 
@@ -53,16 +53,19 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.params['id'] ;
     this.tournoi = new Tournoi('', '', id);
 
-    this.currentTournamentIndex = id ; // Récupère l'ID du tournoi administré
-
-    this.tournoiSubscription = this.tournoiService.tournoisSubject.subscribe(
-      (tournois: Tournoi[]) => {
-        this.tournois = tournois ;
-      }
-    );
-
     this.tournoiService.getTournois() ;
     this.tournoiService.emitTournois() ;
+
+    this.currentTournamentIndex = id ; // Récupère l'ID du tournoi administré
+
+    this.tournoiService.getSingleTournoi(this.currentTournamentIndex).then(
+      (tournoi: Tournoi) => {
+        this.tournoi = tournoi ;
+        this.nombreDeJoueurs = this.tournoi.registeredPlayers.length ;
+
+        if (this.tournoi.isLive === false)
+        { this.nombreDeJoueurs-- ; }
+    }) ;
 
     this.joueurSubscription = this.joueurService.joueursSubject.subscribe(
       (joueurs: Joueur[]) => {
@@ -73,12 +76,9 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.joueurService.getPlayers() ;
     this.joueurService.emitPlayers() ;
 
-    this.tournoi = this.tournois[id] ;
-
     this.onInitForm() ;
     this.onInitRecherche() ;
     this.onInitFormRondes() ;
-    this.calculerNombreDeRondes() ;
   }
 
   onInitForm() {
@@ -124,6 +124,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
 
     this.joueursTrouves = [] ;
     this.formRecherche.reset() ;
+    this.nombreDeJoueurs++ ;
     this.calculerNombreDeRondes() ;
   }
 
@@ -148,20 +149,44 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     if (recherche !== '') // Ne lance la recherche que si il y a un caractère à chercher
     {
       for (let i = 0 ; i < this.joueurs.length ; i++) {
-        if (this.joueurs[i].firstName.toLowerCase().search(recherche.toLowerCase()) !== -1 ) { this.joueursTrouves.push(this.joueurs[i]) ; }
-        else if (this.joueurs[i].lastName.toLowerCase().search(recherche.toLowerCase()) !== -1 ) { this.joueursTrouves.push(this.joueurs[i]) ; }
-        else if (this.joueurs[i].playerID.toString().search(recherche.toLowerCase()) !== -1 ) { this.joueursTrouves.push(this.joueurs[i]) ; }
+        if (this.joueurs[i].firstName.toLowerCase().search(recherche.toLowerCase()) !== -1 )
+        {
+          if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
+          { this.joueursTrouves.push(this.joueurs[i]) ; }
+        }
+        else if (this.joueurs[i].lastName.toLowerCase().search(recherche.toLowerCase()) !== -1 )
+        {
+          if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
+          { this.joueursTrouves.push(this.joueurs[i]) ; }
+        }
+        else if (this.joueurs[i].playerID.toString().search(recherche.toLowerCase()) !== -1 )
+        {
+          if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
+          { this.joueursTrouves.push(this.joueurs[i]) ; }
+        }
       }
     }
   }
 
+  checkIfPlayerAlreadyRegistered(pId: string){
+    let alreadyRegistered = false ;
+    for (let i = 0 ; i < this.tournoi.registeredPlayers.length ; i++)
+    {
+      if (this.tournoi.registeredPlayers[i].playerID === pId.toString())
+      {
+        alreadyRegistered = true ;
+        i = this.tournoi.registeredPlayers.length ;
+      }
+    }
+    return alreadyRegistered ;
+  }
+
   ngOnDestroy() {
-    this.tournoiSubscription.unsubscribe() ;
+
     this.joueurSubscription.unsubscribe() ;
   }
 
   calculerNombreDeRondes() {
-
     if (this.forceRoundNumber === null) {
 
       if ( this.tournoi.registeredPlayers.length < 4) {this.tournoi.nombreDeRondes = 0 ; }
@@ -174,7 +199,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
       if ( this.tournoi.registeredPlayers.length > 129 && this.tournoi.registeredPlayers.length < 227) {this.tournoi.nombreDeRondes = 8 ; }
     }
 
-    this.tournoiService.setRoundNumber(+this.currentTournamentIndex, this.tournoi.nombreDeRondes) ;
+    this.tournoiService.setRoundNumber(this.tournoi.tournamentId, this.tournoi.nombreDeRondes) ;
   }
 
   onForcerRondes() {
@@ -201,8 +226,6 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.tournoi.inscriptionsOuvertes = false ;
     this.tournoi.rondeEnCours = 1 ;
     this.tournoiService.beginTournament(this.currentTournamentIndex) ;
-    const nouvelleRonde = new Ronde(this.tournoi.tournamentName, this.tournoi.rondeEnCours) ;
-    this.rondeService.createRonde(nouvelleRonde) ;
     this.router.navigate(['gererronde', this.currentTournamentIndex]) ;
   }
 

@@ -14,16 +14,20 @@ export class Tournoi {
   public inscriptionsOuvertes: boolean ;
   public roundNumberIsFixed: boolean ;
   public isFinished: boolean ;
+  public step: string ;
 
   /* composants du tournoi */
   public rondes: Ronde[] ;
   public currentStanding: Joueur[] ; // Dernier classement connu du tournoi
-  public registeredPlayers: Joueur[] ; // Tableau fixe des joueurs inscrits
+  public registeredPlayers: Joueur[] = []; // Tableau fixe des joueurs inscrits
+  public currentMatches: Match[] = [] ;
 
   constructor(public tournamentName: string, public format: string, public tournamentId: number) {
     this.registeredPlayers = [] ;
     this.nombreDeRondes = 0 ;
     this.isFinished = false ;
     this.rondes = [new Ronde(tournamentName, 0)] ;
+    this.currentMatches = [new Match(new Joueur('bye', '', '15000'), new Joueur('bye', '', '15000'))] ;
+    this.step = 'rounds' ;
   }
 }

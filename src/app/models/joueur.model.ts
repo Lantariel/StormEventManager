@@ -1,3 +1,5 @@
+import {Penalty} from './penalty.model';
+
 export class Joueur {
 
   score: number ; // Nombre de points sur un tournoi
@@ -7,6 +9,7 @@ export class Joueur {
   matchsPlayed: number ;
   gameWins: number ;
   matchWins: number ;
+  personnalMatchWinRate: number ;
   opponentsMatchWinRate: number ;
   personnalGameWinRate: number ;
   opponentsGameWinRate: number ;
@@ -15,8 +18,9 @@ export class Joueur {
   status: string ; // Statut actif ou inactif au sein d'un tournoi
   commander: string; // Général joué au sein d'un tournoi en duel commander
   decklist: string; // Lien vers la decklist
-  warnings: string[] ; // Pénalités reçues
+  warnings: Penalty[] = [] ; // Pénalités reçues
   previousOpponents: number[] = [] ; // Index des adversaires affrontés pendant le tournoi
+  alreadyHadBye = false ;
 
   playerIndex: number ; // Index dans le tableau des joueurs locaux
   playerIndexInEvent: number ; // Index du joueur au sein d'un tournoi

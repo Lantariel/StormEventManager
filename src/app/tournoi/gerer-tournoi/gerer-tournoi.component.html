@@ -4,7 +4,7 @@
 <div class="row">
   <div class="col">
     <h3>Paramètres du tournoi</h3>
-    <div><b>Joueurs inscrits : </b>{{ tournoi.registeredPlayers.length-1 }}</div>
+    <div><b>Joueurs inscrits : </b>{{ this.nombreDeJoueurs }}</div>
     <div><b>Nombre de rondes :</b> {{ tournoi.nombreDeRondes }}</div>
     <div><b>Format :</b> {{ tournoi.format }}</div>
     <hr/>
@@ -54,10 +54,12 @@
 
  <div class="col">
    <h3>Joueurs inscrits :</h3>
-   <div *ngFor="let joueur of this.tournoi.registeredPlayers ; let i = index ;">
-     <button *ngIf="joueur.firstName !== 'Bye'" class="btn btn-default" (click)="onDesinscrireJoueur(i)" onmouseover="this.style.color='#ff0505'" onmouseout="this.style.color=''">
-       <div><b>- {{ joueur.firstName }}  {{ joueur.lastName }} - {{ joueur.playerID }}</b></div>
-     </button>
-   </div>
+   <table class="tabjoueurs">
+     <tr *ngFor="let joueur of this.tournoi.registeredPlayers ; let i = index ;" (click)="onDesinscrireJoueur(i)" onmouseover="this.style.color='#ff0505'" onmouseout="this.style.color='black'">
+       <td><span *ngIf="joueur.firstName !== 'Bye'" style="padding-right: 10px">{{ joueur.firstName }}</span></td>
+       <td><span *ngIf="joueur.firstName !== 'Bye'" style="padding-right: 10px">{{ joueur.lastName }}</span></td>
+       <td><span *ngIf="joueur.firstName !== 'Bye'"> {{ joueur.playerID }}</span></td>
+     </tr>
+   </table>
  </div>
 </div>

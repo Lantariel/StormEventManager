@@ -35,8 +35,8 @@ export class CreerTournoiComponent implements OnInit {
     newTournoi.rondeEnCours = 0 ;
     newTournoi.isLive = false ;
     newTournoi.inscriptionsOuvertes = true ;
-    newTournoi.registeredPlayers = [] ;
 
+    newTournoi.registeredPlayers = [] ;
     const bye = new Joueur('Bye', '', null) ;
     newTournoi.registeredPlayers.push(bye) ;
 
