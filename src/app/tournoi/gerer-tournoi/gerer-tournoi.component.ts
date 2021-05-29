@@ -36,6 +36,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   formInscription: FormGroup ; // Le formulaire d'inscription
   formRecherche: FormGroup ; // Formulaire de recherche
   formRondes: FormGroup ; // Formulaire pour forcer un nombre de rondes
+  formTop: FormGroup ; // Formulaire pour fixer les phases éliminatoires
 
 /* === Recherche d'un joueur dans la base de donnée ==== */
 
@@ -65,6 +66,9 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
 
         if (this.tournoi.isLive === false)
         { this.nombreDeJoueurs-- ; }
+
+        if (this.tournoi.roundNumberIsFixed === true)
+        { this.forceRoundNumber = this.tournoi.nombreDeRondes ; }
     }) ;
 
     this.joueurSubscription = this.joueurService.joueursSubject.subscribe(
@@ -79,6 +83,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.onInitForm() ;
     this.onInitRecherche() ;
     this.onInitFormRondes() ;
+    this.onInitFormTop() ;
   }
 
   onInitForm() {
@@ -97,6 +102,12 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.formRondes = this.formBuilder.group({
       nombreAForcer: ['', Validators.required]
     });
+ }
+
+  onInitFormTop(){
+    this.formTop = this.formBuilder.group({
+      fixTop: ['', Validators.required]
+    }) ;
  }
 
   onInscrireJoueurDepuisRecherche(id: string) {
@@ -159,6 +170,11 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
           if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
           { this.joueursTrouves.push(this.joueurs[i]) ; }
         }
+        else if (this.joueurs[i].nickname.toLowerCase().search(recherche.toLowerCase()) !== -1 )
+        {
+          if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
+          { this.joueursTrouves.push(this.joueurs[i]) ; }
+        }
         else if (this.joueurs[i].playerID.toString().search(recherche.toLowerCase()) !== -1 )
         {
           if (!this.checkIfPlayerAlreadyRegistered(this.joueurs[i].playerID))
@@ -206,6 +222,34 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     const nb = this.formRondes.get('nombreAForcer').value ;
     this.forcerNombreDeRondes(nb) ;
     this.formRondes.reset() ;
+    this.tournoi.roundNumberIsFixed = true ;
+  }
+
+  onSetTournamentTop() {
+    const nb = this.formTop.get('fixTop').value ;
+
+    if (+nb === 0)
+    {
+      this.tournoi.tournamentCut = 8 ;
+      this.tournoiService.setTournamentTop(this.tournoi.tournamentId, 8) ;
+    }
+
+    else if (+nb === 1)
+    {
+      this.tournoi.tournamentCut = 4 ;
+      this.tournoiService.setTournamentTop(this.tournoi.tournamentId, 4) ;
+    }
+    else if (+nb === 2)
+    {
+      this.tournoi.tournamentCut = 2 ;
+      this.tournoiService.setTournamentTop(this.tournoi.tournamentId, 2) ;
+    }
+    else
+    {
+      this.tournoi.tournamentCut = 8 ;
+      this.tournoiService.setTournamentTop(this.tournoi.tournamentId, 8) ;
+    }
+    this.formTop.reset() ;
   }
 
   forcerNombreDeRondes(nb: number) {
@@ -218,7 +262,8 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   onAnnulerForcageDesRondes() {
     this.forceRoundNumber = null ;
     this.calculerNombreDeRondes() ;
-    this.tournoiService.desactivateFixedRoundNumber(this.currentTournamentIndex) ;
+    this.tournoiService.desactivateFixedRoundNumber(this.currentTournamentIndex, this.tournoi.nombreDeRondes) ;
+    this.tournoi.roundNumberIsFixed = false ;
   }
 
   onCommencerTournoi() {
@@ -231,5 +276,10 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
 
   routeToRondes() {
     this.router.navigate(['gererronde', this.currentTournamentIndex]) ;
+  }
+
+  onToggleFinals(){
+    this.tournoi.finalBracket = !this.tournoi.finalBracket;
+    this.tournoiService.setFinalsActivation(this.tournoi.tournamentName, this.tournoi.finalBracket) ;
   }
 }

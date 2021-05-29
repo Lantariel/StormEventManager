@@ -25,6 +25,11 @@ import { GererRondesComponent } from './tournoi/gerer-rondes/gerer-rondes.compon
 import {VariablesGlobales} from './services/variablesGlobales';
 import {TournoiService} from './services/tournoi.service';
 import { GererJoueursComponent } from './tournoi/gerer-joueurs/gerer-joueurs.component';
+import { AfficherInfosAuxJoueursComponent } from './tournoi/afficher-infos-aux-joueurs/afficher-infos-aux-joueurs.component';
+import { SwitchpairingsComponent } from './tournoi/switchpairings/switchpairings.component';
+import { PreviousRoundsComponent } from './tournoi/previous-rounds/previous-rounds.component';
+import { FinalmatchesComponent } from './tournoi/finalmatches/finalmatches.component';
+import { DisplayTournamentResultsComponent } from './tournoi/display-tournament-results/display-tournament-results.component';
 
 const appRoutes: Routes = [
   {path: 'auth/signup', component: SignupComponent},
@@ -35,6 +40,12 @@ const appRoutes: Routes = [
   {path: 'addplayer', canActivate: [AuthGuardService], component: CreerJoueurLocalComponent},
   {path: 'gerertournoi/:id', canActivate: [AuthGuardService], component: GererTournoiComponent},
   {path: 'gererronde/:id', canActivate: [AuthGuardService], component: GererRondesComponent},
+  {path: 'gererjoueurs/:id', canActivate: [AuthGuardService], component: GererJoueursComponent},
+  {path: 'afficherinfos/:id', canActivate: [AuthGuardService], component: AfficherInfosAuxJoueursComponent},
+  {path: 'switchpairings/:id', canActivate: [AuthGuardService], component: SwitchpairingsComponent},
+  {path: 'previousrounds/:id', canActivate: [AuthGuardService], component: PreviousRoundsComponent},
+  {path: 'finalmatches/:id', canActivate: [AuthGuardService], component: FinalmatchesComponent},
+  {path: 'tournamentresults/:id', canActivate: [AuthGuardService], component: DisplayTournamentResultsComponent},
   {path: '', redirectTo: 'listetournois', pathMatch: 'full'},
   {path: '**', redirectTo: 'listetournois'}
 ] ;
@@ -52,7 +63,12 @@ const appRoutes: Routes = [
     JoueursLocauxComponent,
     CreerJoueurLocalComponent,
     GererRondesComponent,
-    GererJoueursComponent
+    GererJoueursComponent,
+    AfficherInfosAuxJoueursComponent,
+    SwitchpairingsComponent,
+    PreviousRoundsComponent,
+    FinalmatchesComponent,
+    DisplayTournamentResultsComponent
   ],
     imports: [
         BrowserModule,

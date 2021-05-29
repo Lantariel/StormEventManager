@@ -1,25 +1,26 @@
 <h3 *ngIf="tournoi.step === 'rounds'">Ronde {{ roundNumber }} sur {{ tournoi.nombreDeRondes }}</h3>
 <h3 *ngIf="tournoi.step === 'finals'">Phases finales</h3>
 <button *ngIf="!this.checkMatchesAlreadyCreated()" class="btn btn-success" (click)="onCreateMatches()">Créer des matchs</button>
-<button *ngIf="displayFinishedMatches === false" class="btn btn-success" (click)="toogleDisplayMatches()">Afficher les matchs terminés</button>
-<button *ngIf="displayFinishedMatches === true" class="btn btn-danger" (click)="toogleDisplayMatches()">Masquer les matchs terminés</button>
+<button *ngIf="displayFinishedMatches === false && this.checkMatchesAlreadyCreated()" class="btn btn-success" (click)="toogleDisplayMatches()">Afficher les matchs terminés</button>
+<button *ngIf="displayFinishedMatches === true && this.checkMatchesAlreadyCreated()" class="btn btn-danger" (click)="toogleDisplayMatches()">Masquer les matchs terminés</button>
 <button *ngIf="this.checkAllMatchesAreOver()" class="btn btn-success" (click)="onNextRound()">Ronde suivante</button>
-<button class="btn btn-primary">Modifier les pairings</button>
-<button class="btn btn-primary">Joueurs</button>
-<button class="btn btn-primary">Rondes précédentes</button>
+<button class="btn btn-primary" (click)="onSwitchPairings()">Modifier les pairings</button>
+<button class="btn btn-primary" (click)="onOpenJoueurs()">Classement / Gestion des joueurs</button>
+<button class="btn btn-primary" (click)="onPreviousRounds()">Rondes précédentes</button>
+<button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement</button>
 <hr/>
 <div class="row">
   <div class="col-md-3">
     <form [formGroup]="formSearchForTable">
       <div class="form-group">
-        <label for="research">Chercher une table :</label>
+        <label for="research">Chercher une table ou un joueur:</label>
         <input id="research" class="form-control" type="text" formControlName="research" (change)="onSearchTable()" autocomplete="off">
       </div>
     </form>
     <div class="match" *ngFor="let match of matchsEnCours ; let i = index" (click)="this.setFocusTable(i + 1)">
       <div [class.finishedMatch]="match.scoreAlreadySubmitted === true" [class.hideFromResearch]="!this.matchResearch(i)">
         <div *ngIf="(match.scoreAlreadySubmitted === true && this.displayFinishedMatches === true) || match.scoreAlreadySubmitted === false && match.joueur1.playerID !== '15000' ">
-          <p><b>Table {{ i + 1 }}</b><br/>
+          <p><b>Table {{ match.table }}</b><br/>
          {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
             {{ match.joueur2.firstName }} {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
           <hr/>
@@ -35,9 +36,9 @@
         <p>{{ matchsEnCours[this.tableFocus - 1].scoreJ1 }} - {{ matchsEnCours[this.tableFocus - 1].scoreJ2 }}</p>
         <form [formGroup]="formScores" (ngSubmit)="onSetScore(this.tableFocus - 1)">
           <div class="form-group">
-            <input type="number" class="form-control score" id="scorej1" formControlName="scorej1">
+            <input type="number" class="form-control score" id="scorej1" formControlName="scorej1" autocomplete="off">
             -
-            <input type="number" class="form-control score" id="scorej2" formControlName="scorej2">
+            <input type="number" class="form-control score" id="scorej2" formControlName="scorej2" autocomplete="off">
           </div>
           <button class="btn btn-primary" type="submit">Valider score</button>
         </form>
@@ -136,4 +137,3 @@
     </div>
   </div>
 </div>
-

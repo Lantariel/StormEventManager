@@ -4,24 +4,42 @@
 <div class="row">
   <div class="col">
     <h3>Paramètres du tournoi</h3>
-    <div><b>Joueurs inscrits : </b>{{ this.nombreDeJoueurs }}</div>
-    <div><b>Nombre de rondes :</b> {{ tournoi.nombreDeRondes }}</div>
     <div><b>Format :</b> {{ tournoi.format }}</div>
+    <div><b>Joueurs inscrits : </b>{{ this.nombreDeJoueurs }}</div>
+    <div><b>Nombre de rondes : </b> {{ tournoi.nombreDeRondes }}</div>
+    <div *ngIf="tournoi.finalBracket"><b>Phases éliminatoires : </b>Oui (top {{ tournoi.tournamentCut }})</div>
+    <div *ngIf="!tournoi.finalBracket"><b>Phases éliminatoires : </b> Non</div>
     <hr/>
 
     <div>
       <form [formGroup]="formRondes" *ngIf="forceRoundNumber === null">
         <div class="form-group">
-          <label for="nombreAForcer">Forcer un nombre de rondes :</label>
-          <input type="text" id="nombreAForcer" formControlName="nombreAForcer">
+          <label for="nombreAForcer">Nombre de rondes :</label>
+          <input class="form-control fixRound" type="number" id="nombreAForcer" formControlName="nombreAForcer">
         </div>
-        <button class="btn btn-primary" type="submit" (click)="onForcerRondes()">Définir nombre de rondes</button>
+        <button class="btn btn-primary fixRound" type="submit" (click)="onForcerRondes()">Fixer le nombre de rondes</button>
       </form>
-
-      <div *ngIf="forceRoundNumber">
-        <p>Rondes fixées à {{ tournoi.nombreDeRondes }}, quelque soit le nombre de joueurs.</p>
+      <div *ngIf="tournoi.roundNumberIsFixed === true">
+        <p class="rouge">Rondes fixées à {{ tournoi.nombreDeRondes }}, quelque soit le nombre de joueurs.</p>
         <button class="btn btn-primary" (click)="onAnnulerForcageDesRondes()" >Rétablir calcul automatique des rondes</button>
       </div>
+      <hr/>
+      <div>
+        <form [formGroup]="formTop">
+          <div class="form-group" *ngIf="tournoi.finalBracket">
+            <label for="fixTop">Top :</label>
+            <select class="form-control fixRound" id="fixTop" formControlName="fixTop">
+              <option value="0">Top 8</option>
+              <option value="1">Top 4</option>
+              <option value="2">Top 2</option>
+            </select>
+          </div>
+        </form>
+        <button class="btn btn-primary finalBtn" (click)="onSetTournamentTop()" *ngIf="tournoi.finalBracket">Fixer phases finales</button>
+        <button class="btn btn-success finalBtn" *ngIf="!tournoi.finalBracket" (click)="onToggleFinals()">Activer les phases finales</button>
+        <button class="btn btn-danger finalBtn" *ngIf="tournoi.finalBracket" (click)="onToggleFinals()">Desactiver les phases finales</button>
+      </div>
+      <hr/>
       <button class="btn btn-success" *ngIf="tournoi.isLive === false" [disabled]="tournoi.nombreDeRondes < 1" (click)="onCommencerTournoi()">Lancer les rondes</button>
       <button class="btn btn-success" *ngIf="tournoi.isLive === true" (click)="routeToRondes()">Ronde en cours</button>
     </div>
@@ -34,7 +52,7 @@
     <form [formGroup]="formRecherche" (ngSubmit)="onChercherJoueurLocal()">
       <div class="form-group">
         <label for="chercheJoueur">Rechercher dans les joueurs locaux</label>
-        <input type="text" id="chercheJoueur" formControlName="chercheJoueur">
+        <input class="form-control" type="text" id="chercheJoueur" formControlName="chercheJoueur" autocomplete="off">
       </div>
       <button class="btn btn-primary">Rechercher</button>
     </form>
@@ -42,11 +60,11 @@
     <div *ngIf="joueursTrouves">
       <div *ngFor="let joueur of joueursTrouves ; let z = index ;">
         <button class="btn btn-default" (click)="onInscrireJoueurDepuisRecherche(joueur.playerID)" onmouseover="this.style.color='#42c431'" onmouseout="this.style.color=''">
-          <div><b>{{ joueur.firstName }}  {{ joueur.lastName }} - {{ joueur.playerID }}</b></div>
+          <div><b>{{ joueur.firstName }} "{{ joueur.nickname }}" {{ joueur.lastName }} - {{ joueur.playerID }} </b></div>
         </button>
       </div>
     </div>
-
+    <hr/>
     <h3 style="margin-bottom: 15px;">Créer un nouveau joueur</h3>
     <app-creer-joueur-local></app-creer-joueur-local>
 
@@ -57,8 +75,8 @@
    <table class="tabjoueurs">
      <tr *ngFor="let joueur of this.tournoi.registeredPlayers ; let i = index ;" (click)="onDesinscrireJoueur(i)" onmouseover="this.style.color='#ff0505'" onmouseout="this.style.color='black'">
        <td><span *ngIf="joueur.firstName !== 'Bye'" style="padding-right: 10px">{{ joueur.firstName }}</span></td>
-       <td><span *ngIf="joueur.firstName !== 'Bye'" style="padding-right: 10px">{{ joueur.lastName }}</span></td>
-       <td><span *ngIf="joueur.firstName !== 'Bye'"> {{ joueur.playerID }}</span></td>
+       <td><span *ngIf="joueur.firstName !== 'Bye' && joueur.nickname !== ''" style="padding-right: 10px"> "{{ joueur.nickname }}"</span></td>
+       <td><span *ngIf="joueur.firstName !== 'Bye'">{{ joueur.lastName }}</span></td>
      </tr>
    </table>
  </div>

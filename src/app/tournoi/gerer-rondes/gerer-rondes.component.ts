@@ -34,7 +34,6 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   displayPenaltyForm: boolean ;
   displayCreateMatchesButton: boolean ;
   rondeActuelle: Ronde ;
-  matchesAreOver: boolean;
   roundNumber: number ;
   matchsEnCours: Match[] ;
 
@@ -96,18 +95,25 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   /* === GESTION DES RONDES === */
 
   onNextRound() {
+    this.tournoi.rondes.push(new Ronde(this.tournoi.tournamentName, this.tournoi.rondeEnCours + 1)) ;
     this.tournoiService.lockMatchResults(this.tournoi.tournamentName) ;
     this.tournoiService.updateWinRates(this.tournoi.tournamentName) ;
     this.tournoiService.calculerClassement(this.tournoi.tournamentName) ;
     this.tournoiService.goToNexRound(this.tournoi.tournamentName) ;
 
     if (this.roundNumber === this.tournoi.nombreDeRondes)
-    { this.tournoi.step = 'finals' ; }
+    {
+      this.tournoi.step = 'finals' ;
+      this.router.navigate(['finalmatches', this.currentTournamentIndex]) ;
+    }
 
-    this.roundNumber++ ;
-    this.tournoi.rondeEnCours++ ;
-    this.tableFocus = 0 ;
-    this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
+    else
+    {
+      this.roundNumber++ ;
+      this.tournoi.rondeEnCours++ ;
+      this.tableFocus = 0 ;
+      this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
+    }
   }
 
   /*  === GESTION DES MATCHS === */
@@ -117,12 +123,10 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   }
 
   onCreateMatches(){
-    this.tournoiService.createPairingsFromStandings(this.tournoi.tournamentName) ;
-    this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
-  }
-
-  onResetMatches(){
-    this.tournoiService.resetMatches(this.tournoi.tournamentName) ;
+   this.tournoiService.createPairingsFromStandings(this.tournoi.tournamentName) ;
+   this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
+   this.displayCreateMatchesButton = false ;
+   this.tournoi.rondes[this.tournoi.rondeEnCours - 1].firstPairingsAlreadySubmitted = true ;
   }
 
   onSearchTable(){
@@ -171,7 +175,7 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   checkMatchesAlreadyCreated(){
       let alreadyCreated = false ;
 
-      if (this.tournoi?.rondes[this.roundNumber - 1]?.firstPairingsAlreadySubmitted === true)
+      if (this.tournoi?.rondes[this.tournoi.rondeEnCours - 1]?.firstPairingsAlreadySubmitted === true)
       { alreadyCreated = true ; }
 
       return alreadyCreated ;
@@ -229,7 +233,25 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
   }
 
-  /* === === */
+  /* === NAVIGATION === */
+
+  onOpenJoueurs(){
+    this.router.navigate(['gererjoueurs', this.currentTournamentIndex]);
+  }
+
+  onSwitchPairings(){
+    this.router.navigate(['switchpairings', this.currentTournamentIndex]);
+  }
+
+  onOpenDisplayInfos(){
+    this.router.navigate(['afficherinfos', this.currentTournamentIndex]);
+  }
+
+  onPreviousRounds(){
+    this.router.navigate(['previousrounds', this.currentTournamentIndex]);
+  }
+
+  /* === ===  */
 
   toogleDisplayMatches() {
     if (this.displayFinishedMatches === true)

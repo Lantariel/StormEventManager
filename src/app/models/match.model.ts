@@ -7,6 +7,7 @@ export class Match {
   public scoreJ1: number ; // Score du joueur 1 dans le match
   public scoreJ2: number ; // Score du joueur 2 dans le match
   public scoreAlreadySubmitted: boolean ; // False si aucun score n'a encore été rentré
+  public table: number ;
 
   /* Composants du match */
   public joueur1: Joueur ; // Joueur 1 au sein du match

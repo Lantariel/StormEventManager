@@ -20,5 +20,6 @@ export class Ronde {
     this.tournament = tnName ;
     this.isActive = true ;
     this.finalStandings.push(new Joueur('' , '' , '0')) ;
+    this.matches = [new Match(new Joueur('' , '' , '0'), new Joueur('' , '' , '0'))] ;
   }
 }

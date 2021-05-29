@@ -23,14 +23,20 @@ export class CreerTournoiComponent implements OnInit {
   initForm() {
     this.tournoiForm = this.formBuilder.group({
       tournamentName: ['', Validators.required],
-      tournamentFormat: ['', Validators.required]
+      tournamentFormat: ['', Validators.required],
+      tournamentType: ['', Validators.required],
+      tournamentPlace: ['', Validators.required]
     });
   }
 
   onSaveTournament() {
     const tournamentName = this.tournoiForm.get('tournamentName').value ;
     const tournamentFormat = this.tournoiForm.get('tournamentFormat').value ;
+    const tournamentType = this.tournoiForm.get('tournamentType').value ;
+    const tournamentPlace = this.tournoiForm.get('tournamentPlace').value ;
     const newTournoi = new Tournoi(tournamentName, tournamentFormat, this.tournoiService.tournois.length) ;
+    newTournoi.tournamentType = tournamentType ;
+    newTournoi.tournamentPlace = tournamentPlace ;
 
     newTournoi.rondeEnCours = 0 ;
     newTournoi.isLive = false ;

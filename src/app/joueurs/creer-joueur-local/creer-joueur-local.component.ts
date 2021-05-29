@@ -26,8 +26,9 @@ export class CreerJoueurLocalComponent implements OnInit {
   initForm() {
 
     this.joueurLocalForm = this.formBuilder.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required]
+      firstName: [''],
+      nickname: [''],
+      lastName: ['']
     }) ;
   }
 
@@ -41,11 +42,13 @@ export class CreerJoueurLocalComponent implements OnInit {
 
     const firstName = this.joueurLocalForm.get('firstName').value ;
     const lastname = this.joueurLocalForm.get('lastName').value ;
+    const nickname = this.joueurLocalForm.get('nickname').value ;
     const playerID = this.joueurService.joueurs.length + tempId ;
     const index = this.joueurService.joueurs.length ;
 
     const newJoueur = new Joueur(firstName, lastname, playerID) ;
     newJoueur.playerIndex = index ;
+    newJoueur.nickname = nickname ;
 
     this.joueurLocalForm.reset() ;
 

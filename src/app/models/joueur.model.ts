@@ -2,6 +2,8 @@ import {Penalty} from './penalty.model';
 
 export class Joueur {
 
+  nickname: string ; // pseudo du joueur
+
   score: number ; // Nombre de points sur un tournoi
 
   // Valeurs pour calculer les départages
@@ -20,11 +22,13 @@ export class Joueur {
   decklist: string; // Lien vers la decklist
   warnings: Penalty[] = [] ; // Pénalités reçues
   previousOpponents: number[] = [] ; // Index des adversaires affrontés pendant le tournoi
-  alreadyHadBye = false ;
+  fixedOnTable: string ;
+  playingAt: string ;
 
   playerIndex: number ; // Index dans le tableau des joueurs locaux
   playerIndexInEvent: number ; // Index du joueur au sein d'un tournoi
 
   constructor(public firstName: string, public lastName: string, public playerID: string) {
+    this.fixedOnTable = 'none' ;
   }
 }

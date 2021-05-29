@@ -19,6 +19,8 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
   rondes: Ronde[] ;
   rondeSubscription: Subscription ;
 
+  displayDelete: boolean;
+
   constructor(private tournoiService: TournoiService,
               private rondeService: RondeService ,
               private router: Router) { }
@@ -31,6 +33,8 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
     );
     this.tournoiService.getTournois() ;
     this.tournoiService.emitTournois() ;
+
+    this.displayDelete = false ;
   }
 
   onNewTournoi() {
@@ -51,5 +55,18 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
 
   onOpenRondes(id){
     this.router.navigate(['gererronde', id]);
+  }
+
+  onOpenTop(id){
+    this.router.navigate(['finalmatches', id]);
+  }
+
+  onOpenStandings(id){
+    this.router.navigate(['tournamentresults', id]);
+
+  }
+
+  onToggleDelete(){
+    this.displayDelete = this.displayDelete !== true;
   }
 }

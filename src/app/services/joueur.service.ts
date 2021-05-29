@@ -62,7 +62,7 @@ export class JoueurService {
   supprimerJoueur(joueur: Joueur) {
     const indexJoueurASupprimer = this.joueurs.findIndex(
       (joueurEl) => {
-      if(joueurEl === joueur) {
+      if (joueurEl === joueur) {
         return true ;
       }
       }
@@ -71,5 +71,25 @@ export class JoueurService {
     this.joueurs.splice(indexJoueurASupprimer, 1) ;
     this.sauvegarderJoueurs() ;
     this.emitPlayers() ;
+  }
+
+  editPlayer(player: Joueur){
+    const pId = this.getPlayerIndex(player.playerID) ;
+    this.joueurs[pId] = player ;
+    this.sauvegarderJoueurs() ;
+    this.emitPlayers() ;
+  }
+
+  getPlayerIndex(pId: string){
+    let id = 0 ;
+    for (let i = 0 ; i < this.joueurs.length ; i++)
+    {
+      if (this.joueurs[i].playerID === pId)
+      {
+        id = i ;
+        i = this.joueurs.length ;
+      }
+    }
+    return id ;
   }
 }
