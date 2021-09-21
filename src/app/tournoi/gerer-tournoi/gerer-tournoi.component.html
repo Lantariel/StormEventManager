@@ -25,6 +25,7 @@
       </div>
       <hr/>
       <div>
+        <p><b>Phases finales</b></p>
         <form [formGroup]="formTop">
           <div class="form-group" *ngIf="tournoi.finalBracket">
             <label for="fixTop">Top :</label>
@@ -40,7 +41,7 @@
         <button class="btn btn-danger finalBtn" *ngIf="tournoi.finalBracket" (click)="onToggleFinals()">Desactiver les phases finales</button>
       </div>
       <hr/>
-      <button class="btn btn-success" *ngIf="tournoi.isLive === false" [disabled]="tournoi.nombreDeRondes < 1" (click)="onCommencerTournoi()">Lancer les rondes</button>
+      <button class="btn btn-success" *ngIf="tournoi.isLive === false" [disabled]="tournoi.nombreDeRondes < 1" (click)="onCommencerTournoi()">Passer au pré-lancement</button>
       <button class="btn btn-success" *ngIf="tournoi.isLive === true" (click)="routeToRondes()">Ronde en cours</button>
     </div>
 
@@ -48,35 +49,36 @@
 
   <div class="col">
 
-    <h3>Rechercher un joueur local</h3>
+    <h3>Rechercher un joueur</h3>
     <form [formGroup]="formRecherche" (ngSubmit)="onChercherJoueurLocal()">
       <div class="form-group">
-        <label for="chercheJoueur">Rechercher dans les joueurs locaux</label>
+        <label for="chercheJoueur">Rechercher dans les joueurs</label>
         <input class="form-control" type="text" id="chercheJoueur" formControlName="chercheJoueur" autocomplete="off">
       </div>
-      <button class="btn btn-primary">Rechercher</button>
     </form>
 
-    <div *ngIf="joueursTrouves">
-      <div *ngFor="let joueur of joueursTrouves ; let z = index ;">
+    <div *ngFor="let joueur of joueurs ; let z = index ;">
+      <div *ngIf="matchResearch(z)">
         <button class="btn btn-default" (click)="onInscrireJoueurDepuisRecherche(joueur.playerID)" onmouseover="this.style.color='#42c431'" onmouseout="this.style.color=''">
-          <div><b>{{ joueur.firstName }} "{{ joueur.nickname }}" {{ joueur.lastName }} - {{ joueur.playerID }} </b></div>
+          <b>{{ joueur.firstName }} "{{ joueur.nickname }}" {{ joueur.lastName }} - {{ joueur.playerID }} </b>
         </button>
       </div>
     </div>
     <hr/>
     <h3 style="margin-bottom: 15px;">Créer un nouveau joueur</h3>
     <app-creer-joueur-local></app-creer-joueur-local>
-
   </div>
-
  <div class="col">
    <h3>Joueurs inscrits :</h3>
+   <form [formGroup]="formRegResearch">
+     <label for="regSearch">Chercher parmis les inscrits :</label>
+     <input type="text" id="regSearch" class="form-control" formControlName="regSearch">
+   </form>
    <table class="tabjoueurs">
      <tr *ngFor="let joueur of this.tournoi.registeredPlayers ; let i = index ;" (click)="onDesinscrireJoueur(i)" onmouseover="this.style.color='#ff0505'" onmouseout="this.style.color='black'">
-       <td><span *ngIf="joueur.firstName !== 'Bye'" style="padding-right: 10px">{{ joueur.firstName }}</span></td>
-       <td><span *ngIf="joueur.firstName !== 'Bye' && joueur.nickname !== ''" style="padding-right: 10px"> "{{ joueur.nickname }}"</span></td>
-       <td><span *ngIf="joueur.firstName !== 'Bye'">{{ joueur.lastName }}</span></td>
+       <td><span *ngIf="matchRegResearch(i)" style="padding-right: 10px">{{ joueur.lastName }}</span></td>
+       <td><span *ngIf="matchRegResearch(i)" style="padding-right: 10px"> "{{ joueur.nickname }}"</span></td>
+       <td><span *ngIf="matchRegResearch(i)">{{ joueur.firstName }}</span></td>
      </tr>
    </table>
  </div>

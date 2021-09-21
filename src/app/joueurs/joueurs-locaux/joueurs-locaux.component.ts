@@ -6,6 +6,7 @@ import {Subscription} from 'rxjs';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {TournoiService} from '../../services/tournoi.service';
 import {Tournoi} from '../../models/tournoi.model';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-joueurs-locaux',
@@ -26,6 +27,7 @@ export class JoueursLocauxComponent implements OnInit {
   toggleEdit: number ;
 
   constructor(private joueurService: JoueurService,
+              private authService: AuthService,
               private tournoiService: TournoiService,
               private formBuilder: FormBuilder,
               private router: Router) { }

@@ -3,6 +3,7 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
 import {JoueurService} from '../../services/joueur.service';
 import {Joueur} from '../../models/joueur.model';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-creer-joueur-local',
@@ -15,6 +16,7 @@ export class CreerJoueurLocalComponent implements OnInit {
   dernierJoueurCree: string ;
 
   constructor(private formBuilder: FormBuilder,
+              private authService: AuthService,
               private joueurService: JoueurService,
               private router: Router) { }
 
@@ -26,9 +28,9 @@ export class CreerJoueurLocalComponent implements OnInit {
   initForm() {
 
     this.joueurLocalForm = this.formBuilder.group({
-      firstName: [''],
-      nickname: [''],
-      lastName: ['']
+      firstName: ['', Validators.required],
+      nickname: ['', Validators.required],
+      lastName: ['', Validators.required]
     }) ;
   }
 

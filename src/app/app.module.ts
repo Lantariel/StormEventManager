@@ -30,6 +30,11 @@ import { SwitchpairingsComponent } from './tournoi/switchpairings/switchpairings
 import { PreviousRoundsComponent } from './tournoi/previous-rounds/previous-rounds.component';
 import { FinalmatchesComponent } from './tournoi/finalmatches/finalmatches.component';
 import { DisplayTournamentResultsComponent } from './tournoi/display-tournament-results/display-tournament-results.component';
+import {PermissionsService} from './services/permissions.service';
+import { PrelaunchComponent } from './tournoi/prelaunch/prelaunch.component';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import { DisplayMetagameComponent } from './tournoi/display-metagame/display-metagame.component';
 
 const appRoutes: Routes = [
   {path: 'auth/signup', component: SignupComponent},
@@ -46,6 +51,8 @@ const appRoutes: Routes = [
   {path: 'previousrounds/:id', canActivate: [AuthGuardService], component: PreviousRoundsComponent},
   {path: 'finalmatches/:id', canActivate: [AuthGuardService], component: FinalmatchesComponent},
   {path: 'tournamentresults/:id', canActivate: [AuthGuardService], component: DisplayTournamentResultsComponent},
+  {path : 'prelaunch/:id', canActivate: [AuthGuardService], component: PrelaunchComponent},
+  {path : 'displaymetagame/:id', canActivate: [AuthGuardService], component: DisplayMetagameComponent},
   {path: '', redirectTo: 'listetournois', pathMatch: 'full'},
   {path: '**', redirectTo: 'listetournois'}
 ] ;
@@ -68,24 +75,29 @@ const appRoutes: Routes = [
     SwitchpairingsComponent,
     PreviousRoundsComponent,
     FinalmatchesComponent,
-    DisplayTournamentResultsComponent
+    DisplayTournamentResultsComponent,
+    PrelaunchComponent,
+    DisplayMetagameComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        HttpClientModule,
-        RouterModule.forRoot(appRoutes),
-        NgSelectModule
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    RouterModule.forRoot(appRoutes),
+    NgSelectModule,
+    MatAutocompleteModule,
+    MatFormFieldModule
+  ],
   providers: [
     AuthService,
     JoueurService,
     MatchService,
     RondeService,
     TournoiService,
-    VariablesGlobales
+    VariablesGlobales,
+    PermissionsService
   ],
   bootstrap: [AppComponent]
 })

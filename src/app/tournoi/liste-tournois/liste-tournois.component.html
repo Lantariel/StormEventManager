@@ -9,17 +9,19 @@
             <div *ngIf="tournoi.isFinished === true">Tournoi terminé</div>
           </div>
           <p>{{ tournoi.tournamentPlace }} - {{ tournoi.format }} - {{ tournoi.tournamentType }}</p>
-          <p *ngIf="!tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length - 1}}</p>
-          <p *ngIf="tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length }}</p>
+          <span *ngIf="tournoi.registeredPlayers">
+            <p *ngIf="!tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length - 1}}</p>
+            <p *ngIf="tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length }}</p>
+          </span>
               <button class="btn btn-success" (click)="onOpenTournoi(i)" *ngIf="tournoi.inscriptionsOuvertes">Ouvrir</button>
               <button class="btn btn-success" (click)="onOpenRondes(i)" *ngIf="tournoi.isLive && tournoi.step === 'rounds'">Ronde en cours</button>
               <button class="btn btn-success" (click)="onOpenStandings(i)" *ngIf="tournoi.isFinished">Classement final</button>
               <button class="btn btn-success" (click)="onOpenTop(i)" *ngIf="tournoi.isLive && tournoi.step === 'finals'">Top {{ tournoi.tournamentCut }} en cours</button>
-              <button class="btn btn-danger droite" (click)="onToggleDelete()" *ngIf="!displayDelete">Supprimer</button>
-          <div *ngIf="displayDelete" class="droite">
+              <button class="btn btn-danger droite" (click)="onToggleDelete(i)" *ngIf="displayDelete !== i">Supprimer</button>
+          <div *ngIf="displayDelete === i" class="droite">
             <b>Êtes vous sûr ?</b>
             <button class="btn btn-danger" (click)="onDeleteTournoi(tournoi)" style="margin-left: 5px">Supprimer</button>
-            <button class="btn btn-success" (click)="onToggleDelete()">Annuler</button>
+            <button class="btn btn-success" (click)="hideDelete()">Annuler</button>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@
 <button class="btn btn-primary" (click)="onOpenJoueurs()">Classement / Gestion des joueurs</button>
 <button class="btn btn-primary" (click)="onPreviousRounds()">Rondes précédentes</button>
 <button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement</button>
+<button class="btn btn-primary" (click)="onDisplayMetagame()">Metagame</button>
 <hr/>
 <div class="row">
   <div class="col-md-3">
@@ -19,11 +20,17 @@
     </form>
     <div class="match" *ngFor="let match of matchsEnCours ; let i = index" (click)="this.setFocusTable(i + 1)">
       <div [class.finishedMatch]="match.scoreAlreadySubmitted === true" [class.hideFromResearch]="!this.matchResearch(i)">
-        <div *ngIf="(match.scoreAlreadySubmitted === true && this.displayFinishedMatches === true) || match.scoreAlreadySubmitted === false && match.joueur1.playerID !== '15000' ">
-          <p><b>Table {{ match.table }}</b><br/>
-         {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
-            {{ match.joueur2.firstName }} {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
-          <hr/>
+        <div class="row" *ngIf="(match.scoreAlreadySubmitted === true && this.displayFinishedMatches === true) || match.scoreAlreadySubmitted === false && match.joueur1.playerID !== '15000' ">
+          <div class="col">
+              <p><b>Table {{ match.table }}</b><br/>
+                {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
+                {{ match.joueur2.firstName }} {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
+              <hr/>
+          </div>
+          <div class="col">
+            <img *ngIf="match.joueur1.commanderImgUrl !== 'x'" class="cmdImg" src="{{ match.joueur1.commanderImgUrl }}" alt="{{ match.joueur1.commander }}">
+            <img *ngIf="match.joueur2.commanderImgUrl !== 'x'" class="cmdImg" src="{{ match.joueur2.commanderImgUrl }}" alt="{{ match.joueur2.commander }}">
+          </div>
         </div>
       </div>
     </div>
@@ -131,8 +138,18 @@
     <hr/>
     <div *ngFor="let match of matchsEnCours ; let i = index">
       <div *ngIf="match.scoreAlreadySubmitted === true" class="matchResult">
-        {{ matchsEnCours[i].joueur1.firstName }} {{ matchsEnCours[i].joueur1.lastName }} {{ matchsEnCours[i].scoreJ1 }} -
-        {{ matchsEnCours[i].scoreJ2 }} {{ matchsEnCours[i].joueur2.firstName }} {{ matchsEnCours[i].joueur2.lastName }}
+        <div class="row">
+          <div class="col col-sm-2">
+            <img *ngIf="matchsEnCours[i].joueur1.commanderImgUrl !== 'x'" class="cmdImg" src="{{ matchsEnCours[i].joueur1.commanderImgUrl }}">
+          </div>
+          <div class="col col-sm-9">
+            {{ matchsEnCours[i].joueur1.firstName }} {{ matchsEnCours[i].joueur1.lastName }} {{ matchsEnCours[i].scoreJ1 }} -
+            {{ matchsEnCours[i].scoreJ2 }} {{ matchsEnCours[i].joueur2.firstName }} {{ matchsEnCours[i].joueur2.lastName }}
+          </div>
+          <div class="col col-sm-1">
+            <img *ngIf="matchsEnCours[i].joueur2.commanderImgUrl !== 'x'" class="cmdImg" src="{{ matchsEnCours[i].joueur2.commanderImgUrl }}">
+          </div>
+        </div>
       </div>
     </div>
   </div>

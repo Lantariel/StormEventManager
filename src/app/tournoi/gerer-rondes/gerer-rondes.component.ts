@@ -11,6 +11,7 @@ import {MatchService} from '../../services/match.service';
 import {RondeService} from '../../services/ronde.service';
 import {Match} from '../../models/match.model';
 import {Penalty} from '../../models/penalty.model';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-gerer-rondes',
@@ -39,6 +40,7 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute,
               private tournoiService: TournoiService,
+              private authService: AuthService,
               private rondeService: RondeService,
               private formBuilder: FormBuilder,
               private router: Router) {
@@ -123,7 +125,12 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   }
 
   onCreateMatches(){
-   this.tournoiService.createPairingsFromStandings(this.tournoi.tournamentName) ;
+
+   if (this.tournoi.rondeEnCours === this.tournoi.nombreDeRondes)
+   { this.tournoiService.createLastRoundPairings(this.tournoi.tournamentName) ; }
+   else
+   { this.tournoiService.createPairingsFromStandings(this.tournoi.tournamentName) ; }
+
    this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
    this.displayCreateMatchesButton = false ;
    this.tournoi.rondes[this.tournoi.rondeEnCours - 1].firstPairingsAlreadySubmitted = true ;
@@ -249,6 +256,10 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
   onPreviousRounds(){
     this.router.navigate(['previousrounds', this.currentTournamentIndex]);
+  }
+
+  onDisplayMetagame(){
+    this.router.navigate(['displaymetagame', this.currentTournamentIndex]) ;
   }
 
   /* === ===  */

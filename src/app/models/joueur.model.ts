@@ -19,11 +19,13 @@ export class Joueur {
 
   status: string ; // Statut actif ou inactif au sein d'un tournoi
   commander: string; // Général joué au sein d'un tournoi en duel commander
+  commanderImgUrl: string ; // url du crop de l'image du général sur Scryfall
   decklist: string; // Lien vers la decklist
   warnings: Penalty[] = [] ; // Pénalités reçues
   previousOpponents: number[] = [] ; // Index des adversaires affrontés pendant le tournoi
-  fixedOnTable: string ;
-  playingAt: string ;
+  fixedOnTable: string ; // Table sur laquelle le joueur est assigné
+  playingAt: string ; // Table sur laquelle le joueur est en train de jouer
+  hasByes: number ; // Nombre de byes que le joueur a pour un tournoi
 
   playerIndex: number ; // Index dans le tableau des joueurs locaux
   playerIndexInEvent: number ; // Index du joueur au sein d'un tournoi

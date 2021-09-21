@@ -9,6 +9,7 @@ import {JoueurService} from '../../services/joueur.service';
 import {VariablesGlobales} from '../../services/variablesGlobales';
 import {Ronde} from '../../models/ronde.model';
 import {RondeService} from '../../services/ronde.service';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-gerer-tournoi',
@@ -31,12 +32,15 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   joueurs: Joueur[] ;
   joueurSubscription: Subscription ;
 
+  joueursDuTournoi: Joueur[] ;
+
 /* === Formulaires ==== */
 
   formInscription: FormGroup ; // Le formulaire d'inscription
   formRecherche: FormGroup ; // Formulaire de recherche
   formRondes: FormGroup ; // Formulaire pour forcer un nombre de rondes
   formTop: FormGroup ; // Formulaire pour fixer les phases éliminatoires
+  formRegResearch: FormGroup ; // Recherche d'un joueur inscrit
 
 /* === Recherche d'un joueur dans la base de donnée ==== */
 
@@ -44,6 +48,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   tempJoueur: Joueur ; // Utile à l'inscription par recherche
 
   constructor(private route: ActivatedRoute,
+              private authService: AuthService,
               private tournoiService: TournoiService,
               private joueurService: JoueurService,
               private formBuilder: FormBuilder,
@@ -57,18 +62,26 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.tournoiService.getTournois() ;
     this.tournoiService.emitTournois() ;
 
+    this.joueurService.getPlayers() ;
+    this.joueurService.emitPlayers() ;
+
     this.currentTournamentIndex = id ; // Récupère l'ID du tournoi administré
 
     this.tournoiService.getSingleTournoi(this.currentTournamentIndex).then(
       (tournoi: Tournoi) => {
         this.tournoi = tournoi ;
-        this.nombreDeJoueurs = this.tournoi.registeredPlayers.length ;
-
-        if (this.tournoi.isLive === false)
-        { this.nombreDeJoueurs-- ; }
+        if (this.tournoi.registeredPlayers)
+        { this.nombreDeJoueurs = this.tournoi.registeredPlayers.length ; }
+        else
+        {
+          this.nombreDeJoueurs = 0 ;
+          this.tournoi.registeredPlayers = [] ;
+        }
 
         if (this.tournoi.roundNumberIsFixed === true)
         { this.forceRoundNumber = this.tournoi.nombreDeRondes ; }
+
+        this.joueursDuTournoi = this.tournoi.registeredPlayers ;
     }) ;
 
     this.joueurSubscription = this.joueurService.joueursSubject.subscribe(
@@ -76,9 +89,6 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
         this.joueurs = joueurs ;
       }
     );
-
-    this.joueurService.getPlayers() ;
-    this.joueurService.emitPlayers() ;
 
     this.onInitForm() ;
     this.onInitRecherche() ;
@@ -89,6 +99,10 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   onInitForm() {
     this.formInscription = this.formBuilder.group({
       player: ['', Validators.required]
+    }) ;
+
+    this.formRegResearch = this.formBuilder.group({
+      regSearch: ['']
     }) ;
   }
 
@@ -120,21 +134,24 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
       { this.tempJoueur = this.joueurs[i] ; }
     }
 
-    for (let i = 0 ; i < this.tournoi.registeredPlayers.length ; i++) // Parcours du tableau des joueurs déjà inscrits
+    if (this.tournoi.registeredPlayers)
     {
-      if (this.tournoi.registeredPlayers[i].playerID === this.tempJoueur.playerID)
-      { this.alreadyRegistered = true ; }
+      for (let i = 0 ; i < this.tournoi.registeredPlayers.length ; i++) // Parcours du tableau des joueurs déjà inscrits
+      {
+        if (this.tournoi.registeredPlayers[i].playerID === this.tempJoueur.playerID)
+        { this.alreadyRegistered = true ; }
+      }
     }
 
     if (this.alreadyRegistered === false) // Si on a pas trouvé de doublon
     {
+      this.tempJoueur.commander = 'x' ;
+      this.tempJoueur.commanderImgUrl = 'x' ;
       this.tournoi.registeredPlayers.push(this.tempJoueur) ; // Ajout du joueur au tableau local
       this.tournoiService.ajouterUnJoueur(this.currentTournamentIndex, this.tempJoueur); // Ajout du joueur au tournoi dans la database et mise à jour de la DB
     }
     else { console.log( 'Joueur déjà inscrit !' ) ; } // Si le joueur est déjà inscrit
 
-    this.joueursTrouves = [] ;
-    this.formRecherche.reset() ;
     this.nombreDeJoueurs++ ;
     this.calculerNombreDeRondes() ;
   }
@@ -148,6 +165,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
       this.tournoiService.retirerUnJoueur(this.tournoi, joueur) ; // Supprime le joueur via le service des tournois
 
       this.calculerNombreDeRondes() ;
+      this.nombreDeJoueurs-- ;
     }
   }
 
@@ -184,16 +202,26 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     }
   }
 
+  onClearReasearch(){
+    this.joueursTrouves = [] ;
+    this.formRecherche.reset() ;
+  }
+
   checkIfPlayerAlreadyRegistered(pId: string){
     let alreadyRegistered = false ;
-    for (let i = 0 ; i < this.tournoi.registeredPlayers.length ; i++)
+
+    if(this.tournoi.registeredPlayers)
     {
-      if (this.tournoi.registeredPlayers[i].playerID === pId.toString())
+      for (let i = 0 ; i < this.tournoi.registeredPlayers.length ; i++)
       {
-        alreadyRegistered = true ;
-        i = this.tournoi.registeredPlayers.length ;
+        if (this.tournoi.registeredPlayers[i].playerID === pId.toString())
+        {
+          alreadyRegistered = true ;
+          i = this.tournoi.registeredPlayers.length ;
+        }
       }
     }
+
     return alreadyRegistered ;
   }
 
@@ -267,11 +295,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   }
 
   onCommencerTournoi() {
-    this.tournoi.isLive = true ;
-    this.tournoi.inscriptionsOuvertes = false ;
-    this.tournoi.rondeEnCours = 1 ;
-    this.tournoiService.beginTournament(this.currentTournamentIndex) ;
-    this.router.navigate(['gererronde', this.currentTournamentIndex]) ;
+    this.router.navigate(['prelaunch', this.currentTournamentIndex]) ;
   }
 
   routeToRondes() {
@@ -281,5 +305,39 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   onToggleFinals(){
     this.tournoi.finalBracket = !this.tournoi.finalBracket;
     this.tournoiService.setFinalsActivation(this.tournoi.tournamentName, this.tournoi.finalBracket) ;
+  }
+
+  matchResearch(id: number){
+
+    const research = this.formRecherche.get('chercheJoueur').value ;
+
+    if (research === '')
+    { return false ; }
+
+    else if (this.checkIfPlayerAlreadyRegistered(this.joueurs[id].playerID))
+    { return false ; }
+
+    else
+    {
+      return this.joueurs[id].firstName.toLowerCase().search(research) !== -1
+        || this.joueurs[id].lastName.toLowerCase().search(research) !== -1
+        || this.joueurs[id].nickname.toLowerCase().search(research) !== -1
+        || this.joueurs[id].playerID.toLowerCase().search(research.toString()) !== -1;
+    }
+  }
+
+  matchRegResearch(id: number){
+    const regResearch = this.formRegResearch.get('regSearch').value ;
+
+    if (regResearch === '' && this.tournoi.registeredPlayers[id].firstName !== 'Bye') { return true ; }
+
+    else if (this.tournoi.registeredPlayers[id].firstName === 'Bye') { return false ; }
+
+    else
+    {
+      return this.tournoi.registeredPlayers[id].firstName.toLowerCase().search(regResearch) !== -1
+        || this.tournoi.registeredPlayers[id].lastName.toLowerCase().search(regResearch) !== -1
+        || this.tournoi.registeredPlayers[id].nickname.toLowerCase().search(regResearch) !== -1 ;
+    }
   }
 }

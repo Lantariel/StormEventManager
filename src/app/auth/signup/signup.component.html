@@ -14,4 +14,7 @@
     </form>
     <p class="text-danger">{{ errorMessage }}</p>
   </div>
+  <div *ngFor="let perm of permissions">
+    {{ perm.associatedMail }}
+  </div>
 </div>
