@@ -1,0 +1,160 @@
+<h3 *ngIf="displayToPlayers === false">Classement à l'issue de la ronde {{ tournoi.rondeEnCours - 1 }}</h3>
+<div class="no-print">
+  <h3 *ngIf="displayToPlayers === true">Joueurs du tournoi</h3>
+  <button class="btn btn-primary" (click)="onBackToRound()">Retour à la ronde {{ this.tournoi.rondeEnCours }}</button>
+  <button class="btn btn-primary" (click)="togleDisplayToPlayers()" *ngIf="displayToPlayers === true">Affichage aux joueurs</button>
+  <button class="btn btn-primary" (click)="togleDisplayToPlayers()" *ngIf="displayToPlayers === false">Affichage des contrôles</button>
+  <button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement</button>
+  <button class="btn btn-dark" (click)="togleDisplayCommanderImg()" *ngIf="displayCommanderImg">Masquer les images</button>
+  <button class="btn btn-dark" (click)="togleDisplayCommanderImg()" *ngIf="!displayCommanderImg">Afficher les images</button>
+  <button class="btn btn-primary" *ngIf="displayToPlayers === false" onclick="window.print();return false;">Imprimer</button>
+  <button class="btn btn-primary" disabled (click)="togleDisplayAddPlayerPannel()">Ajouter un joueur (WIP)</button>
+</div>
+<hr/>
+<!--<button class="btn btn-primary" (click)="onRefreshStanding()">Refresh</button>-->
+<div *ngIf="dislpayAddPlayerPannel === true">
+  <h4>Ajouter un joueur</h4>
+  <form [formGroup]="formAddPlayer">
+    <div class="form-group">
+      <input class="form-control" type="text" id="playerid" formControlName="playerid" autocomplete="off">
+      <button class="btn btn-success" (click)="searchPlayer()">chercher</button>
+    </div>
+  </form>
+  <div *ngFor="let joueur of searchPlayerResult">
+    <button class="btn btn-default" (click)="addPlayerDuringEvent(joueur)">{{ joueur.firstName }} {{ joueur.lastName }}</button>
+  </div>
+</div>
+<hr/>
+<form [class.hiddenToPlayers]="displayToPlayers === false" [formGroup]="chercherJoueur">
+  <div class="form-group">
+    <label for="search">Recherche :</label>
+    <input class="form-control" type="text" id="search" formControlName="search" autocomplete="off">
+  </div>
+</form>
+<div [class.row]="displayToPlayers === true">
+  <div [class.col]="displayToPlayers === true">
+    <table class="table table-sm table-hover tableStanding">
+      <thead class="thead-dark">
+      <tr>
+        <th class="tabJoueursCell commandCell">Commandant</th>
+        <th class="tabJoueursCell commandCell">Partner</th>
+        <th class="tabJoueursCell standingCell">#</th>
+        <th class="tabJoueursCell">Prénom</th>
+        <th class="tabJoueursCell">Nom</th>
+        <th class="tabJoueursCell">Score</th>
+        <th class="tabJoueursCell">OWR</th>
+        <th class="tabJoueursCell">GW</th>
+        <th class="tabJoueursCell">OGW</th>
+        <th class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">Statut</th>
+        <th class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">Pénalités reçues</th>
+        <th class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">Drop / Rehab</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let joueur of this.joueursDuTournoi ; let i = index" (click)="setFocusPlayer(i)">
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell commandCell">
+          <div *ngIf="!displayCommanderImg && joueur.commanderImgUrl !== 'x'">{{ joueur.commander }}</div>
+          <div *ngIf="displayCommanderImg"><img class="commanderImg" src="{{ joueur.commanderImgUrl }}" *ngIf="joueur.commanderImgUrl !== 'x'" alt="{{ joueur.commander }}"></div>
+        </td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell commandCell">
+          <div *ngIf="!displayCommanderImg">{{ joueur.partner }}</div>
+          <div *ngIf="displayCommanderImg"><img class="partnerImg" src="{{ joueur.partnerImgUrl }}" *ngIf="joueur.partnerImgUrl !== null" alt="{{ joueur.partner }}"></div>
+        </td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell standingCell">{{ i + 1 }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.firstName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.lastName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.score }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell paddingReq">{{ joueur.opponentsMatchWinRate * 100 | number: '1.3-3'}}%</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell paddingReq">{{ joueur.personnalGameWinRate * 100 | number: '1.3-3'}}%</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell paddingReq">{{ joueur.opponentsGameWinRate * 100 | number: '1.3-3'}}%</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">{{ joueur.status }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">{{ this.getRealPenalties(i) }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">
+          <button *ngIf="joueur.status === 'dropped'" class="btn btn-success" (click)="onRehabPlayer(i)">Rehab</button>
+          <button *ngIf="joueur.status === 'active'" class="btn btn-danger" (click)="onDropPlayer(i)">Drop</button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div [class.col]="displayToPlayers === true" [class.hiddenToPlayers]="displayToPlayers === false">
+    <div *ngIf="playerFocus !== -1"class="joueurcontrol sticky-top" >
+      <h4>{{ this.joueursDuTournoi[this.playerFocus].firstName }} {{ this.joueursDuTournoi[this.playerFocus].lastName }}</h4>
+      <div>
+        Commandant : {{ joueursDuTournoi[this.playerFocus].commander }}<br/>
+        <span *ngIf="joueursDuTournoi[this.playerFocus].partner">Partenaire : {{ joueursDuTournoi[this.playerFocus].partner }}<br/></span>
+        Score : {{ this.joueursDuTournoi[this.playerFocus].score }}<br/>
+        <a *ngIf="joueursDuTournoi[this.playerFocus].decklist" href="{{ joueursDuTournoi[this.playerFocus].decklist }}" target="_blank">Decklist</a>
+        <span *ngIf="!joueursDuTournoi[this.playerFocus].decklist">Aucune decklist fournie</span>
+        <hr/>
+        <form [formGroup]="formDecklist">
+          <div class="form-group row">
+            <label for="decklist">Fournir une decklist :</label>
+            <input class="form-control infosInput" type="text" id="decklist" formControlName="decklist" autocomplete="off">
+            <button class="btn btn-success" (click)="onSetDecklist(this.playerFocus)">Ok</button>
+          </div>
+        </form>
+        <div *ngIf="this.joueursDuTournoi[this.playerFocus].fixedOnTable !== 'none'">
+          <b>Fixé en table {{ this.joueursDuTournoi[this.playerFocus].fixedOnTable }}</b>
+        </div>
+        <hr/>
+        <b>Historique des matchs :</b>
+        <div *ngFor="let match of this.getHistory(this.playerFocus) ; let y = index">
+          R{{ y + 1}} - {{ match }}
+        </div>
+        <hr/>
+        <b>Pénalités reçues :</b>
+        <div *ngFor="let penalty of this.joueursDuTournoi[this.playerFocus].warnings">
+          <div *ngIf="penalty.penaltyType !== 'none'">
+            R{{ penalty.roundNumber }} - {{ penalty.penaltyType }} = {{ penalty.penaltySanction }}<br/>
+            <i>{{ penalty.penaltyDesc }}</i>
+          </div>
+          <hr/>
+        </div>
+        <div>
+          <b>Options</b><br/>
+          <form [formGroup]="assignToTable" autocomplete="off">
+            <div class="form-group row">
+              <label for="table">Fixer sur une table spécifique :</label>
+              <input class="form-control tableInput" type="number" id="table" formControlName="table">
+              <button class="btn btn-success" (click)="onAssignToTable()">Ok</button>
+              <p *ngIf="displayInfoMsg" id="info">{{ this.infoMsg }}</p>
+              <p *ngIf="displayErrorMsg" id="error">{{ this.errorMsg }}</p>
+            </div>
+            <button *ngIf="checkIfPlayerIsFixed(playerFocus)" class="btn btn-danger" (click)="onRemoveFixedTable(playerFocus)">Ne plus fixer le joueur</button>
+          </form>
+          <hr/>
+            <button class="btn btn-danger" (click)="deleteCommander(this.playerFocus)">Effacer généraux</button>
+            <button class="btn btn-danger" (click)="deletePartner(this.playerFocus)">Effacer partenaire</button>
+          <hr/>
+          <form [formGroup]="formCommander">
+            <div class="form-group row">
+              <label for="commander">Indiquer le général :</label>
+              <input class="form-control infosInput" type="text" id="commander" [matAutocomplete]="auto" formControlName="commander" (keyup)="onKeySearch($event)">
+              <mat-autocomplete #auto="matAutocomplete" class="cmdAutocomplete">
+                <mat-option class="options" *ngFor="let option of commanderAutocomplete" [value]="option">
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+            </div>
+            <button class="btn btn-success" (click)="onSetCommander(this.playerFocus)" [disabled]="formCommander.invalid">Ok</button>
+          </form>
+          <div *ngIf="this.joueursDuTournoi[this.playerFocus].commander !== 'x'">
+            <form [formGroup]="formPartner">
+              <div class="form-group row">
+                <label for="partner">Indiquer le partenaire :</label>
+                <input class="form-control infosInput" type="text" id="partner" formControlName="partner" [matAutocomplete]="auto" (keyup)="onKeySearchPartner($event)">
+                <mat-autocomplete #auto="matAutocomplete" class="cmdAutocomplete">
+                  <mat-option class="options" *ngFor="let option of partnerAutocomplete" [value]="option">
+                    {{ option }}
+                  </mat-option>
+                </mat-autocomplete>
+                <button class="btn btn-success" (click)="onSetPartner(this.playerFocus)" [disabled]="formPartner.invalid">Ok</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

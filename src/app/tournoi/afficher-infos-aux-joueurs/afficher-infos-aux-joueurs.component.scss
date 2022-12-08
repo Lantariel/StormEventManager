@@ -1,0 +1,18 @@
+.center{
+  text-align: center;
+}
+
+.btn{
+  margin-right: 5px;
+}
+
+.colTable{
+  width: 150px;
+}
+
+@media print {
+  .no-print
+  {
+    display: none !important;
+  }
+}

@@ -1,0 +1,33 @@
+<h3>Placement des joueurs pour la ronde {{ tournoi.rondeEnCours }}</h3>
+<div class="no-print">
+  <button class="btn btn-primary" (click)="onBackToRound()">Retour à la ronde {{ tournoi.rondeEnCours }}</button>
+  <button class="btn btn-primary" (click)="onOpenJoueurs()">Classement / Gestion des joueurs</button>
+  <button class="btn btn-primary" (click)="onSwitchPairings()">Modifier les pairings</button>
+  <button class="btn btn-primary" onclick="window.print();return false;">Imprimer</button>
+</div>
+<hr/>
+<div class="row standings">
+  <div class="col col-sm-12">
+    <table class="table table-sm table-hover">
+      <thead class="thead-dark">
+      <tr>
+        <th class="tabJoueursCell center colTable">Table</th>
+        <th class="tabJoueursCell">Nom</th>
+        <th class="tabJoueursCell">Prénom</th>
+        <th class="tabJoueursCell">Score</th>
+        <th class="tabJoueursCell">Adversaire</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let joueur of this.triJoueurs ; let i = index">
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell center colTable">{{ joueur.playingAt }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.lastName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.firstName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.score }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">VS {{ this.getOpponent(joueur) }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

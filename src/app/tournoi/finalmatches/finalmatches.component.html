@@ -1,0 +1,139 @@
+<h3>Phases finales</h3>
+<button class="btn btn-success" *ngIf="displayCreateMatchesButton" (click)="onCreateMatches()">Créer des matchs</button>
+<button *ngIf="this.checkAllMatchesAreOver() && tournoi.currentMatches.length > 1" class="btn btn-success" (click)="onNextStep()">Phase suivante</button>
+<button *ngIf="this.checkAllMatchesAreOver() && tournoi.currentMatches.length === 1" class="btn btn-success" (click)="onEndTournament()">Terminer le tournoi</button>
+<button class="btn btn-primary" (click)="onSwitchPairings()">Modifier les pairings</button>
+<button class="btn btn-primary" (click)="onOpenJoueurs()">Classement / Gestion des joueurs</button>
+<button class="btn btn-primary" (click)="onPreviousRounds()">Rondes précédentes</button>
+<button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement</button>
+<button class="btn btn-primary" (click)="onDisplayMetagame()">Metagame</button>
+<hr/>
+<div class="row">
+  <div class="col-md-3">
+    <form [formGroup]="formSearchForTable">
+      <div class="form-group">
+        <label for="research">Chercher une table ou un joueur:</label>
+        <input id="research" class="form-control" type="text" formControlName="research" autocomplete="off">
+      </div>
+    </form>
+    <div class="match" *ngFor="let match of matchsEnCours ; let i = index" (click)="this.setFocusTable(i + 1)">
+      <div [class.finishedMatch]="match.scoreAlreadySubmitted === true" [class.hideFromResearch]="!this.matchResearch(i)">
+        <div *ngIf="(match.scoreAlreadySubmitted === true) || match.scoreAlreadySubmitted === false && match.joueur1.playerID !== '15000' ">
+          <p><b>Table {{ match.table }}</b><br/>
+            {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
+            {{ match.joueur2.firstName }} {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
+          <hr/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div *ngIf="tableFocus !== -1">
+      <div class="focusTable">
+        <h4>Table {{ this.tableFocus }}</h4>
+        <p>{{ matchsEnCours[this.tableFocus - 1].joueur1.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur1.lastName }} VS {{ matchsEnCours[this.tableFocus - 1].joueur2.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur2.lastName }}</p>
+        <p>{{ matchsEnCours[this.tableFocus - 1].scoreJ1 }} - {{ matchsEnCours[this.tableFocus - 1].scoreJ2 }}</p>
+        <form [formGroup]="formScores" (ngSubmit)="onSetScore(this.tableFocus - 1)">
+          <div class="form-group">
+            <input type="number" class="form-control score" id="scorej1" formControlName="scorej1" autocomplete="off">
+            -
+            <input type="number" class="form-control score" id="scorej2" formControlName="scorej2" autocomplete="off">
+          </div>
+          <button class="btn btn-primary" type="submit">Valider score</button>
+        </form>
+        <p class="rouge" *ngIf="errorMsg">{{ this.errorMsg }}</p>
+      </div>
+      <hr/>
+      <div>
+        <h4>Pénalités</h4>
+        <div id="penaltyJ1" class="penalyList">
+          <b>{{ matchsEnCours[this.tableFocus - 1].joueur1.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur1.lastName }} :</b>
+          <div *ngFor="let penalty of matchsEnCours[this.tableFocus - 1].joueur1.warnings">
+            <div *ngIf="penalty.roundNumber !== 0">
+              <p>R{{ penalty.roundNumber }} {{ penalty.penaltyType }} :<br/>
+                <i>{{ penalty.penaltyDesc }}</i></p>
+            </div>
+          </div>
+        </div>
+        <div id="penaltyJ2" class="penalyList">
+          <b>{{ matchsEnCours[this.tableFocus - 1].joueur2.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur2.lastName }} :</b>
+          <div *ngFor="let penalty of matchsEnCours[this.tableFocus - 1].joueur2.warnings">
+            <div *ngIf="penalty.roundNumber !== 0">
+              <p>R{{ penalty.roundNumber }} {{ penalty.penaltyType }} :<br/>
+                <i>{{ penalty.penaltyDesc }}</i></p>
+            </div>
+          </div>
+        </div>
+        <button *ngIf="!displayPenaltyForm" class="btn btn-success" (click)="toogleDisplayPenaltyPannel()">Entrer pénalité</button>
+        <button *ngIf="displayPenaltyForm" class="btn btn-danger" (click)="toogleDisplayPenaltyPannel()">Réduire</button>
+        <div *ngIf="displayPenaltyForm" id="addPenalty">
+          <form [formGroup]="formPenalty" (ngSubmit)="onSetPenalty()">
+            <div class="form-group">
+              <label for="player">Joueur :</label>
+              <select class="form-control" id="player" formControlName="player">
+                <option value="1">{{ matchsEnCours[this.tableFocus - 1].joueur1.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur1.lastName }}</option>
+                <option value="2">{{ matchsEnCours[this.tableFocus - 1].joueur2.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur2.lastName }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="type">Infraction :</label>
+              <select class="form-control" id="type" formControlName="type">
+                <option value="GPE - Missed Trigger">GPE - Missed Trigger</option>
+                <option value="GPE - Looking at Extra Card">GPE - Looking at Extra Card</option>
+                <option value="GPE - Hidden Card Error">GPE - Hidden Card Error</option>
+                <option value="GPE - Mulligan Procedure Error">GPE - Mulligan Procedure Error</option>
+                <option value="GPE - Game Rule Violation">GPE - Game Rule Violation</option>
+                <option value="GPE - Failure to Maintain Game State">GPE - Failure to Maintain Game State</option>
+                <option value="TE - Tardiness">TE - Tardiness</option>
+                <option value="TE - Outside Assistance">TE - Outside Assistance</option>
+                <option value="TE - Slow Play">TE - Slow Play</option>
+                <option value="TE - Decklist Problem">TE - Decklist Problem</option>
+                <option value="TE - Deck Problem">TE - Deck Problem</option>
+                <option value="TE - Limited Procedure Violation">TE - Limited Procedure Violation</option>
+                <option value="TE - Communication Policy Violation">TE - Communication Policy Violation</option>
+                <option value="TE - Marked Card">TE - Marked Card</option>
+                <option value="TE - Insufficient Shuffling">TE - Insufficient Shuffling</option>
+                <option value="USC - Minor">USC - Minor</option>
+                <option value="USC - Major">USC - Major</option>
+                <option value="USC - Improperly Determining a Winner">USC - Improperly Determining a Winner</option>
+                <option value="USC - Bribery and Wagering">USC - Bribery and Wagering</option>
+                <option value="USC - Aggressive Behavior">USC - Aggressive Behavior</option>
+                <option value="USC - Theft of Tournament Material">USC - Theft of Tournament Material</option>
+                <option value="USC - Stalling">USC - Stalling</option>
+                <option value="USC - Cheating">USC - Cheating</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Sanction :</label>
+              <select class="form-control" id="sanction" formControlName="sanction">
+                <option value="Warning">Warning</option>
+                <option value="Game Loss">Game Loss</option>
+                <option value="Match Loss">Match Loss</option>
+                <option value="Disqualification">Disqualification</option>
+              </select>
+            </div>
+            <div>
+              <label for="desc">Description :</label>
+              <input class="form-control" id="desc" type="text" formControlName="desc">
+            </div>
+            <div>
+              <label for="judge">Donnée par :</label>
+              <input class="form-control" id="judge" type="text" formControlName="judge">
+            </div>
+            <button class="btn btn-success" type="submit">Appliquer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <h4>Résultats :</h4>
+    <hr/>
+    <div *ngFor="let match of matchsEnCours ; let i = index">
+      <div *ngIf="match.scoreAlreadySubmitted === true" class="matchResult">
+        {{ matchsEnCours[i].joueur1.firstName }} {{ matchsEnCours[i].joueur1.lastName }} {{ matchsEnCours[i].scoreJ1 }} -
+        {{ matchsEnCours[i].scoreJ2 }} {{ matchsEnCours[i].joueur2.firstName }} {{ matchsEnCours[i].joueur2.lastName }}
+      </div>
+    </div>
+  </div>
+</div>

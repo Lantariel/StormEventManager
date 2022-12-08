@@ -1,0 +1,97 @@
+<div class="row">
+  <h3>Byes et decklists</h3>
+</div>
+<div class="row recherche">
+  <div class="col">
+    <form [formGroup]="formResearch">
+        <label for="search">Chercher un joueur :</label>
+        <input id="search" type="text" class="form-control" formControlName="search" autocomplete="off">
+    </form>
+  </div>
+  <div class="col">
+    <button class="btn btn-success right boutonsDroite" (click)="onLancerRondes()">Lancer les rondes</button>
+    <button class="btn btn-primary right boutonsDroite" (click)="onRetourAuxInscriptions()">Retour aux inscriptions</button>
+  </div>
+</div>
+<div class="row">
+  <div class="col col-sm-5">
+    <div class="row">
+      <div class="col">
+        <h4>Joueurs disposants de byes</h4>
+        <table>
+          <tr *ngFor="let joueur of tournoi.registeredPlayers ; let i = index">
+            <td *ngIf="joueur.hasByes > 0">{{ joueur.firstName }}</td>
+            <td *ngIf="joueur.hasByes > 0">{{ joueur.lastName }}</td>
+            <td *ngIf="joueur.hasByes > 0">{{ joueur.hasByes }}</td>
+            <td *ngIf="joueur.hasByes > 0"><button class="btn btn-success" (click)="onGrantBye(i)">+</button></td>
+            <td *ngIf="joueur.hasByes > 0"><button class="btn btn-danger" (click)="onReduceBye(i)">-</button></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <h4>Joueurs sans bye</h4>
+        <table>
+          <tr *ngFor="let joueur of tournoi.registeredPlayers ; let i = index">
+            <td *ngIf="joueur.hasByes <= 0 && matchReasearch(i)">{{ joueur.firstName }}</td>
+            <td *ngIf="joueur.hasByes <= 0 && matchReasearch(i)">"{{ joueur.nickname }}"</td>
+            <td *ngIf="joueur.hasByes <= 0 && matchReasearch(i)">{{ joueur.lastName }}</td>
+            <td *ngIf="joueur.hasByes <= 0 && matchReasearch(i)"><button class="btn btn-success" (click)="onGrantBye(i)">+</button></td>
+          </tr>
+        </table>
+      </div>
+  </div>
+</div>
+  <div class="col col-sm-7">
+    <div class="row">
+      <div class="col">
+        <h4>Spécifier les decks</h4>
+        <form [formGroup]="formDecklist">
+        <table class="table table-sm table-hover">
+          <thead class="thead-dark">
+          <tr>
+            <th>Prénom</th>
+            <th>Pseudo</th>
+            <th>Nom</th>
+            <th>Commandant</th>
+            <th>Editer commandant</th>
+            <th>Decklist</th>
+            <th>Modifier decklist</th>
+          </tr>
+          </thead>
+          <tr *ngFor="let joueur of tournoi.registeredPlayers ; let i = index">
+            <td *ngIf="matchReasearch(i)">{{ joueur.firstName }}</td>
+            <td *ngIf="matchReasearch(i)">"{{ joueur.nickname }}"</td>
+            <td *ngIf="matchReasearch(i)">{{ joueur.lastName }}</td>
+            <td *ngIf="matchReasearch(i)">
+              <span *ngIf="toggleCommanderInput !== i || toggleCommanderInput === -1">{{ joueur.commander }}</span>
+              <input *ngIf="toggleCommanderInput === i" type="text" class="form-control" id="commander" formControlName="commander" [matAutocomplete]="auto" (keyup)="onKeySearch($event)">
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let option of commanderAutocomplete" [value]="option">
+                  {{ option }}
+                </mat-option>
+              </mat-autocomplete>
+            </td>
+            <td *ngIf="matchReasearch(i)">
+              <button *ngIf="toggleCommanderInput === -1" class="btn btn-success" (click)="onToggleCommander(i)">+</button>
+              <button *ngIf="toggleCommanderInput === i" class="btn btn-success" (click)="onSetCommander(i)">ok</button>
+              <button *ngIf="toggleCommanderInput === i" class="btn btn-danger" (click)="onToggleCommander(-1)">cancel</button>
+            </td>
+            <td *ngIf="matchReasearch(i)">
+              <span *ngIf="toggleDecklistInput !== i && joueur.decklist"><a href="{{ joueur.decklist }}" target="_blank">decklist</a></span>
+              <span *ngIf="toggleDecklistInput !== i && !joueur.decklist">no list</span>
+              <input *ngIf="toggleDecklistInput === i" type="text" class="form-control" id="decklist" formControlName="decklist">
+            </td>
+            <td *ngIf="matchReasearch(i)">
+              <button class="btn btn-success" (click)="onToggleDeckListInput(i)" *ngIf="toggleDecklistInput !== i">+</button>
+              <button class="btn btn-success" *ngIf="toggleDecklistInput === i" (click)="onAddDecklist(i)">ok</button>
+              <button class="btn btn-danger" (click)="onToggleDeckListInput(-1)" *ngIf="toggleDecklistInput === i">cancel</button>
+            </td>
+          </tr>
+        </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
