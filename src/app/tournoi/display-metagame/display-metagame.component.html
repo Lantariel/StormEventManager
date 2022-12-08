@@ -1,0 +1,28 @@
+<h3>Metagame</h3>
+<button class="btn btn-primary" (click)="onBackToRound()">Retour</button>
+<hr/>
+<div class="row">
+  <div class="col">
+    <table class="table table-sm table-hover">
+      <tr *ngFor="let deck of metagame ; let i = index" (click)="onSetFocus(i)" class="trDeck" >
+        <td>{{ deck.numberOfPlayers }} X </td>
+        <td><img class="deckimg" src="{{ deck.deckImgUrl }}" alt="{{ deck.deckName }}"></td>
+        <td>{{ deck.deckName }}</td>
+      </tr>
+    </table>
+  </div>
+  <div class="col">
+    <div class="sticky-top">
+      <div *ngIf="deckFocusName !== ''"><h3>{{ deckFocusName }}</h3></div>
+      <div *ngIf="deckFocus !== -1">
+        <div *ngFor="let pilote of getDeckPilots(metagame[deckFocus]) ; let i = index">
+          <b>{{ pilote.firstName }} {{ pilote.lastName }} [{{ pilote.score }}]</b>
+          <div *ngFor="let matchups of this.getPlayerMatchUps(pilote.playerIndexInEvent) ; let y = index">
+            {{ matchups }}
+          </div>
+          <hr/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,54 @@
+<h3>Modification des matchs </h3>
+<button class="btn btn-primary" (click)="onBackToRound()">Retour à la ronde {{ this.tournoi.rondeEnCours }}</button>
+<button class="btn btn-danger" (click)="onResetMatches()" *ngIf="started">Reset les pairings</button>
+<button class="btn btn-danger" (click)="onMakePairingsManyaly()" *ngIf="!started">Pairings manuels</button>
+<button *ngIf="playerstoPair.length === 0" class="btn btn-success droite" (click)="validateMatches()">Valider les matchs</button>
+<hr/>
+<div class="row">
+  <div class="col-sm-3">
+    <form [formGroup]="formSearchForTable">
+      <div class="form-group">
+        <label for="research">Chercher une table ou un joueur :</label>
+        <input id="research" class="form-control" type="text" formControlName="research" autocomplete="off">
+      </div>
+    </form>
+    <div class="match" *ngFor="let match of tournoi.currentMatches ; let i = index">
+      <div [class.hideFromResearch]="!this.matchResearch(i)">
+        <b>Table {{ match.table }}</b> <button class="btn btn-danger" style="float: right" (click)="removeMatch(i, match.joueur1, match.joueur2)">x</button><br/>
+        {{ match.joueur1.firstName }} "{{ match.joueur1.nickname }}" {{ match.joueur1.lastName }} [{{ match.joueur1.score }}]<br/>
+        {{ match.joueur2.firstName }} "{{ match.joueur2.nickname }}" {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]<br/>
+        <hr/>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div>
+      <h4>Créer un match :</h4>
+      <div *ngIf="selectedPlayer1 !== null">Joueur 1 : {{ selectedPlayer1.firstName }} "{{ selectedPlayer1.nickname }}" {{ selectedPlayer1.lastName }} [{{ selectedPlayer1.score }}] </div>
+      <div *ngIf="selectedPlayer2 !== null">Joueur 2 : {{ selectedPlayer2.firstName }} "{{ selectedPlayer2.nickname }}" {{ selectedPlayer2.lastName }} [{{ selectedPlayer2.score }}]</div>
+      <div *ngIf="selectedPlayer1 !== null && selectedPlayer2 === null">Joueur 2 :</div>
+      <div class="rouge" *ngIf="checkIfPlayersAlreadyFaced(this.selectedPlayer1, this.selectedPlayer2)">Ces deux joueurs se sont déjà affrontés !</div>
+      <div *ngIf="checkIfTableIsAlreadyTaken()" class="rouge">Cette table est déjà occupée</div>
+      <hr/>
+      <form [formGroup]="tableInput">
+        <div *ngIf="selectedPlayer1 !== null" class="form-group row">
+          <label for="tableNumber">Table :</label>
+          <input class="form-control tableInput" id="tableNumber" formControlName="tableNumber" type="number" min="1">
+        </div>
+      </form>
+      <button class="btn btn-success matchControls"*ngIf="matchIsComplete() && !checkIfTableIsAlreadyTaken()" (click)="createMatch()" [disabled]="tableInput.invalid">Valider</button>
+      <button class="btn btn-primary matchControls" *ngIf="selectedPlayer1 !== null && !matchIsComplete()" (click)="giveBye()">Attribuer un bye</button>
+      <button class="btn btn-danger matchControls" *ngIf="selectedPlayer1 !== null" (click)="cancelMatchCreation()">Annuler</button>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <h4>Joueurs non appareillés :</h4>
+    <div class="joueurSelect" *ngFor="let joueur of playerstoPair ; let i = index">
+        <button class="btn btn-success" (click)="selectPlayer(i)" *ngIf="pairingPossible(joueur)">+</button>
+        {{ joueur.firstName }} "{{ joueur.nickname }}" {{ joueur.lastName }} [{{ joueur.score }}]
+    </div>
+    <div *ngFor="let drop of droppedPlayers ; let y = index">
+      (drop) {{ drop.firstName }} "{{ drop.nickname }}" {{ drop.lastName }} [{{ drop.score }}]
+    </div>
+  </div>
+</div>

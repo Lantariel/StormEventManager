@@ -1,0 +1,86 @@
+.tabJoueursCell{
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.commandCell{
+ width: 120px;
+}
+
+.standingCell{
+  width: 50px;
+}
+
+.paddingReq{
+  padding-right: 25px;
+}
+
+.tableInput{
+  width: 50px;
+  margin-right: 10px;
+  margin-left: 5px;
+}
+
+.infosInput{
+  width: 200px;
+  margin-left: 5px ;
+  margin-right: 10px;
+}
+
+#info{
+  color: #42c431;
+}
+
+#error{
+  color: #ff0000 ;
+}
+
+.btn{
+  margin-right: 5px;
+}
+
+.hiddenToPlayers{
+  display: none;
+}
+
+.barre{
+  text-decoration: line-through;
+}
+
+#setCommander{
+  width: 70%;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+#setDecklist{
+  width: 70%;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.commanderImg{
+  width: 100px;
+}
+
+.partnerImg{
+  width: 50px;
+}
+
+.joueurcontrol{
+  padding-top: 20px;
+}
+
+.cmdAutocomplete{
+    z-index: 1000;
+}
+
+@media print {
+  .no-print
+  {
+    display: none !important;
+  }
+}
+
+.cdk-overlay-container { z-index: 9999; }

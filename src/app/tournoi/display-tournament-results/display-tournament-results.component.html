@@ -1,0 +1,67 @@
+<h3 *ngIf="displayToPlayers === true">Joueurs du tournoi</h3>
+<h3 *ngIf="displayToPlayers === false">Classement à l'issue de la ronde {{ tournoi.rondeEnCours - 1 }}</h3>
+<button class="btn btn-primary" (click)="onBackToEvents()">Retour</button>
+
+<hr/>
+<form [formGroup]="chercherJoueur">
+  <div class="form-group">
+    <label for="search">Recherche :</label>
+    <input class="form-control" type="text" id="search" formControlName="search" autocomplete="off">
+  </div>
+</form>
+<div class="row">
+  <div class="col-sm-9">
+    <table class="table table-sm table-hover">
+      <thead class="thead-dark">
+      <tr>
+        <th class="tabJoueursCell">#</th>
+        <th class="tabJoueursCell">Prénom</th>
+        <th class="tabJoueursCell">Nom</th>
+        <th class="tabJoueursCell">Score</th>
+        <th class="tabJoueursCell">OWR</th>
+        <th class="tabJoueursCell">GW</th>
+        <th class="tabJoueursCell">OGW</th>
+        <th class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">Pénalités reçues</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let joueur of this.joueursDuTournoi ; let i = index" (click)="setFocusPlayer(i)">
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ i + 1 }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.firstName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.lastName }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.score }}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.opponentsMatchWinRate | number: '1.3-3'}}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.personnalGameWinRate | number: '1.3-3'}}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell">{{ joueur.opponentsGameWinRate | number: '1.3-3'}}</td>
+        <td *ngIf="matchResearch(i)" class="tabJoueursCell" [class.hiddenToPlayers]="displayToPlayers === false">{{ this.getRealPenalties(i) }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-sm-3">
+    <div *ngIf="playerFocus !== -1">
+      <h4>{{ this.joueursDuTournoi[this.playerFocus].firstName }} {{ this.joueursDuTournoi[this.playerFocus].lastName }}</h4>
+      <div>
+        Commandant : TBH<br/>
+        Score : {{ this.joueursDuTournoi[this.playerFocus].score }}<br/>
+        <div *ngIf="this.joueursDuTournoi[this.playerFocus].fixedOnTable !== 'none'">
+          <b>Fixé en table {{ this.joueursDuTournoi[this.playerFocus].fixedOnTable }}</b>
+        </div>
+        <hr/>
+        <b>Historique des matchs :</b>
+        <div *ngFor="let match of this.getHistory(this.playerFocus) ; let y = index">
+          R{{ y + 1}} - {{ match }}
+        </div>
+        <hr/>
+        <b>Pénalités reçues :</b>
+        <div *ngFor="let penalty of this.joueursDuTournoi[this.playerFocus].warnings">
+          <div *ngIf="penalty.penaltyType !== 'none'">
+            R{{ penalty.roundNumber }} - {{ penalty.penaltyType }} = {{ penalty.penaltySanction }}<br/>
+            <i>{{ penalty.penaltyDesc }}</i>
+          </div>
+          <hr/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

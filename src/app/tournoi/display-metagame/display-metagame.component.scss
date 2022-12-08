@@ -1,0 +1,62 @@
+.commanderPic{
+  width: 150px;
+}
+
+.table{
+  text-align: center;
+}
+
+.centrer{
+  vertical-align: middle;
+}
+
+.decks{
+  display: inline;
+}
+
+.deck{
+  width: 350px;
+  margin: 5px;
+  text-align: center;
+  border: solid 1px;
+
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
+
+.deck-head{
+  padding: 5px;
+  color: white;
+  background-color: black;
+}
+
+.deckbody{
+  height: 150px;
+}
+
+.deckimg{
+  height: 100%;
+}
+
+.table{
+  cursor: pointer;
+}
+
+.numberofplayers{
+  text-align: center;
+  font-size: 30px;
+}
+
+.boutonsPilotes{
+  margin: 5px;
+}
+
+.deckimg{
+  width: 80px;
+}
+
+.trDeck:hover{
+  background-color: lightgray;
+}

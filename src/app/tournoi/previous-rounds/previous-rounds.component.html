@@ -1,0 +1,56 @@
+<h3>Rondes précédentes</h3>
+<button class="btn btn-primary" (click)="onBackToRound()">Retour à la ronde {{ this.tournoi.rondeEnCours }}</button>
+<button class="btn btn-success droite" (click)="onValidateChanges()">Valider les changements</button>
+<hr/>
+<div class="row">
+  <div *ngFor="let ronde of rondes ; let i = index;">
+    <button class="btn btn-primary" (click)="setRoundFocus(i)" >Ronde {{ ronde.roundNumber }}</button>
+  </div>
+</div>
+<div class="row" id="roundFocus">
+  <div class="col">
+    <div *ngIf="roundFocus !== -1">
+      <h4>Ronde {{ roundFocus }}</h4>
+      <table class="table table-hover">
+        <thead class="thead-dark">
+        <tr>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let match of rondes[roundFocus - 1].matches ; let i = index" (click)="setCorrectFocus(i)">
+          <td>Table {{ match.table }}</td>
+          <td>{{ match.joueur1.firstName }} {{ match.joueur1.lastName }}</td>
+          <td>{{ match.scoreJ1 }}</td>
+          <td> - </td>
+          <td>{{ match.scoreJ2 }}</td>
+          <td>{{ match.joueur2.firstName }} {{ match.joueur2.lastName }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="col">
+    <div *ngIf="correctFocus !== -1">
+      <h4>Correction de score</h4>
+      <div style="text-align: center">
+        <b>Table {{ this.rondes[roundFocus - 1].matches[correctFocus].table }}</b><br/>
+        {{ this.rondes[roundFocus - 1].matches[correctFocus].joueur1.firstName }} {{ this.rondes[roundFocus - 1].matches[correctFocus].joueur1.lastName }}
+        - {{ this.rondes[roundFocus - 1].matches[correctFocus].joueur2.firstName }} {{ this.rondes[roundFocus - 1].matches[correctFocus].joueur2.lastName }}
+        <form [formGroup]="formScores">
+          <div class="form-group" *ngIf="this.rondes[roundFocus - 1].matches[correctFocus].joueur2.playerID !== '15000'">
+            <input class="form-control score" type="number" id="scorej1" formControlName="scorej1"> - <input class="form-control score" type="number" id="scorej2" formControlName="scorej2">
+          </div>
+          <button class="btn btn-success" (click)="onSetScore(roundFocus - 1, correctFocus)" *ngIf="this.rondes[roundFocus - 1].matches[correctFocus].joueur2.playerID !== '15000'">Valider</button>
+          <p class="rouge" *ngIf="this.rondes[roundFocus - 1].matches[correctFocus].joueur2.playerID !== '15000'">Attention, vous êtes en train de modifier un score sur une ronde passée. Les tiebreakers vont être recalculés lorsque vous validerez les changements.</p>
+        </form>
+        <p class="vert" [class.hideValidate]="!displayChangesAreValidated">Les changements ont été validés avec succès. Les scores et tiebreakers des joueurs sont à jour !</p>
+      </div>
+    </div>
+  </div>
+</div>
