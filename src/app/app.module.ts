@@ -24,6 +24,18 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import { GererRondesComponent } from './tournoi/gerer-rondes/gerer-rondes.component';
 import {VariablesGlobales} from './services/variablesGlobales';
 import {TournoiService} from './services/tournoi.service';
+import { GererJoueursComponent } from './tournoi/gerer-joueurs/gerer-joueurs.component';
+import { AfficherInfosAuxJoueursComponent } from './tournoi/afficher-infos-aux-joueurs/afficher-infos-aux-joueurs.component';
+import { SwitchpairingsComponent } from './tournoi/switchpairings/switchpairings.component';
+import { PreviousRoundsComponent } from './tournoi/previous-rounds/previous-rounds.component';
+import { FinalmatchesComponent } from './tournoi/finalmatches/finalmatches.component';
+import { DisplayTournamentResultsComponent } from './tournoi/display-tournament-results/display-tournament-results.component';
+import {PermissionsService} from './services/permissions.service';
+import { PrelaunchComponent } from './tournoi/prelaunch/prelaunch.component';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import { DisplayMetagameComponent } from './tournoi/display-metagame/display-metagame.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 const appRoutes: Routes = [
   {path: 'auth/signup', component: SignupComponent},
@@ -34,6 +46,14 @@ const appRoutes: Routes = [
   {path: 'addplayer', canActivate: [AuthGuardService], component: CreerJoueurLocalComponent},
   {path: 'gerertournoi/:id', canActivate: [AuthGuardService], component: GererTournoiComponent},
   {path: 'gererronde/:id', canActivate: [AuthGuardService], component: GererRondesComponent},
+  {path: 'gererjoueurs/:id', canActivate: [AuthGuardService], component: GererJoueursComponent},
+  {path: 'afficherinfos/:id', canActivate: [AuthGuardService], component: AfficherInfosAuxJoueursComponent},
+  {path: 'switchpairings/:id', canActivate: [AuthGuardService], component: SwitchpairingsComponent},
+  {path: 'previousrounds/:id', canActivate: [AuthGuardService], component: PreviousRoundsComponent},
+  {path: 'finalmatches/:id', canActivate: [AuthGuardService], component: FinalmatchesComponent},
+  {path: 'tournamentresults/:id', canActivate: [AuthGuardService], component: DisplayTournamentResultsComponent},
+  {path : 'prelaunch/:id', canActivate: [AuthGuardService], component: PrelaunchComponent},
+  {path : 'displaymetagame/:id', canActivate: [AuthGuardService], component: DisplayMetagameComponent},
   {path: '', redirectTo: 'listetournois', pathMatch: 'full'},
   {path: '**', redirectTo: 'listetournois'}
 ] ;
@@ -50,24 +70,36 @@ const appRoutes: Routes = [
     GererTournoiComponent,
     JoueursLocauxComponent,
     CreerJoueurLocalComponent,
-    GererRondesComponent
+    GererRondesComponent,
+    GererJoueursComponent,
+    AfficherInfosAuxJoueursComponent,
+    SwitchpairingsComponent,
+    PreviousRoundsComponent,
+    FinalmatchesComponent,
+    DisplayTournamentResultsComponent,
+    PrelaunchComponent,
+    DisplayMetagameComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        FormsModule,
-        ReactiveFormsModule,
-        HttpClientModule,
-        RouterModule.forRoot(appRoutes),
-        NgSelectModule
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    RouterModule.forRoot(appRoutes),
+    NgSelectModule,
+    MatAutocompleteModule,
+    MatFormFieldModule,
+    BrowserAnimationsModule
+  ],
   providers: [
     AuthService,
     JoueurService,
     MatchService,
     RondeService,
     TournoiService,
-    VariablesGlobales
+    VariablesGlobales,
+    PermissionsService
   ],
   bootstrap: [AppComponent]
 })

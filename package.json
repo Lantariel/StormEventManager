@@ -28,6 +28,8 @@
     "ngx-order-pipe": "^2.1.1",
     "rxjs": "^6.6.3",
     "save": "^2.4.0",
+    "scryfall": "^0.9.7",
+    "scryfall-client": "^0.18.6",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"
   },

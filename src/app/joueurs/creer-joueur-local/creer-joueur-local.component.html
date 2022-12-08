@@ -3,11 +3,15 @@
     <form [formGroup]="joueurLocalForm" (ngSubmit)="onSaveJoueurLocal()">
       <div class="form-group">
         <label for="firstName">Prénom :</label>
-        <input type="text" class="form-control" id="firstName" formControlName="firstName">
+        <input type="text" class="form-control" id="firstName" formControlName="firstName" autocomplete="off">
       </div>
       <div class="form-group">
         <label for="lastName">Nom :</label>
-        <input type="text" class="form-control" id="lastName" formControlName="lastName">
+        <input type="text" class="form-control" id="lastName" formControlName="lastName" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="nickname">Pseudo :</label>
+        <input type="text" class="form-control" id="nickname" formControlName="nickname" autocomplete="off">
       </div>
       <button class="btn btn-primary" [disabled]="joueurLocalForm.invalid" type="submit">Envoyer</button>
       <div *ngIf="dernierJoueurCree !== ''" (click)="resetNotif()" style="color: #42c431;">{{ dernierJoueurCree }} ajouté aux joueurs locaux !</div>

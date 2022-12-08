@@ -1,0 +1,87 @@
+.matchisover {
+  width: 100% ;
+  background-color: #c4ffcf;
+}
+
+.winner {
+  font-weight: bold;
+}
+
+.hidden {
+  display: none;
+}
+
+.match {
+  cursor: pointer;
+  width: 100%;
+}
+
+.match:hover{
+  background-color: #F9F9F9;
+}
+
+.focusTable{
+  text-align: center;
+}
+
+.gras{
+ font-weight: bold;
+}
+
+.score{
+  width: 60px;
+  height: 40px ;
+  display: inline;
+  margin: 5px ;
+}
+
+.timeinput{
+  width: 60px;
+  height: 40px ;
+  display: inline;
+  margin: 5px ;
+}
+
+.finishedMatch{
+  background-color: #c4ffcf;
+}
+
+.matchResult{
+  margin-top: 15px;
+}
+
+.penalyList{
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.hideFromResearch{
+  display: none;
+}
+
+.btn{
+  margin-right: 5px;
+}
+
+.droite{
+  float: right;
+}
+
+.cmdImg{
+  display: block;
+  width: 50px;
+  margin-bottom: 5px;
+}
+
+#commander{
+  text-align: center;
+}
+
+.middlepannel{
+  padding-top: 20px;
+}
+
+.timeDisplay{
+  color: red ;
+  font-weight: bold;
+}
