@@ -41,7 +41,13 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
 
     this.tournoiSubscription = this.tournoiService.tournoisSubject.subscribe(
       (tournois: Tournoi[]) => {
-        this.tournois = tournois ;
+        this.tournois = [] ;
+        for (let i = 0 ; i < tournois.length ; i++)
+        {
+          if (this.checkTournamentEditors(tournois[i]))
+          { this.tournois.push(tournois[i]) ; }
+        }
+        //this.tournois = tournois ;
       }
     );
 
@@ -49,7 +55,6 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
     this.tournoiService.emitTournois() ;
 
     this.displayDelete = false ;
-    //this.checkIfPermissionExists() ;
   }
 
   onNewTournoi() {
@@ -93,11 +98,15 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
     this.displayDelete = false ;
   }
 
-  checkIfPermissionExists(){
-    if (this.permissionService.checkIfPermissionExist(this.authService.getCurrentUser().email) !== true)
+  checkTournamentEditors(tournoi: Tournoi){
+    let isEditor = false ;
+
+    for (let i = 0 ; i < tournoi.editors.length ; i++)
     {
-      const newPermission = new Permission(this.authService.getCurrentUser().email, 1, 'player') ;
-      this.permissionService.createPermission(newPermission) ;
+      if (tournoi.editors[i] === this.authService.getCurrentUser().email)
+      { isEditor = true ; }
     }
+    return isEditor ;
   }
+
 }

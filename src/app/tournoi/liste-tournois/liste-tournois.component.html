@@ -2,27 +2,27 @@
     <div class="col-xl-12">
       <div class="list-group">
         <div class="list-group-item" *ngFor="let tournoi of tournois ; let i = index">
-          <div class="row">
-            <h3 class="col-8">{{ tournoi.tournamentName }}</h3>
-            <div *ngIf="tournoi.isLive" class="col-4">Live !</div>
-            <div *ngIf="tournoi.inscriptionsOuvertes" class="col-4">Inscriptions ouvertes</div>
-            <div *ngIf="tournoi.isFinished === true">Tournoi terminé</div>
-          </div>
-          <p>{{ tournoi.tournamentPlace }} - {{ tournoi.format }} - {{ tournoi.tournamentType }}</p>
-          <span *ngIf="tournoi.registeredPlayers">
+            <div class="row">
+              <h3 class="col-8">{{ tournoi.tournamentName }}</h3>
+              <div *ngIf="tournoi.isLive" class="col-4">Live !</div>
+              <div *ngIf="tournoi.inscriptionsOuvertes" class="col-4">Inscriptions ouvertes</div>
+              <div *ngIf="tournoi.isFinished === true">Tournoi terminé</div>
+            </div>
+            <p>{{ tournoi.tournamentPlace }} - {{ tournoi.format }} - {{ tournoi.tournamentType }}</p>
+            <span *ngIf="tournoi.registeredPlayers">
             <p *ngIf="!tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length - 1}}</p>
             <p *ngIf="tournoi.isLive">Nombre de joueurs : {{ tournoi.registeredPlayers.length }}</p>
           </span>
-              <button class="btn btn-success" (click)="onOpenTournoi(i)" *ngIf="tournoi.inscriptionsOuvertes">Ouvrir</button>
-              <button class="btn btn-success" (click)="onOpenRondes(i)" *ngIf="tournoi.isLive && tournoi.step === 'rounds'">Ronde en cours</button>
-              <button class="btn btn-success" (click)="onOpenStandings(i)" *ngIf="tournoi.isFinished">Classement final</button>
-              <button class="btn btn-success" (click)="onOpenTop(i)" *ngIf="tournoi.isLive && tournoi.step === 'finals'">Top {{ tournoi.tournamentCut }} en cours</button>
-              <button class="btn btn-danger droite" (click)="onToggleDelete(i)" *ngIf="displayDelete !== i">Supprimer</button>
-          <div *ngIf="displayDelete === i" class="droite">
-            <b>Êtes vous sûr ?</b>
-            <button class="btn btn-danger" (click)="onDeleteTournoi(tournoi)" style="margin-left: 5px">Supprimer</button>
-            <button class="btn btn-success" (click)="hideDelete()">Annuler</button>
-          </div>
+            <button class="btn btn-success" (click)="onOpenTournoi(i)" *ngIf="tournoi.inscriptionsOuvertes">Ouvrir</button>
+            <button class="btn btn-success" (click)="onOpenRondes(i)" *ngIf="tournoi.isLive && tournoi.step === 'rounds'">Ronde en cours</button>
+            <button class="btn btn-success" (click)="onOpenStandings(i)" *ngIf="tournoi.isFinished">Classement final</button>
+            <button class="btn btn-success" (click)="onOpenTop(i)" *ngIf="tournoi.isLive && tournoi.step === 'finals'">Top {{ tournoi.tournamentCut }} en cours</button>
+            <button class="btn btn-danger droite" (click)="onToggleDelete(i)" *ngIf="displayDelete !== i">Supprimer</button>
+            <div *ngIf="displayDelete === i" class="droite">
+              <b>Êtes vous sûr ?</b>
+              <button class="btn btn-danger" (click)="onDeleteTournoi(tournoi)" style="margin-left: 5px">Supprimer</button>
+              <button class="btn btn-success" (click)="hideDelete()">Annuler</button>
+            </div>
         </div>
       </div>
       <button class="btn btn-primary" (click)="onNewTournoi()">Créer un tournoi</button>

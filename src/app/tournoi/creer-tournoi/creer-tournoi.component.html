@@ -20,6 +20,10 @@
         <label for="tournamentPlace">Localisation du tournoi :</label>
         <input type="text" class="form-control" id="tournamentPlace" formControlName="tournamentPlace">
       </div>
+      <div class="form-group">
+        <label for="tournamentDate">Date du tournoi :</label>
+        <input type="date" class="form-control" id="tournamentDate" formControlName="tournamentDate">
+      </div>
       <button class="btn btn-primary" [disabled]="tournoiForm.invalid" type="submit">Envoyer</button>
     </form>
   </div>

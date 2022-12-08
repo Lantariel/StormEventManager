@@ -35,6 +35,7 @@ import { PrelaunchComponent } from './tournoi/prelaunch/prelaunch.component';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import { DisplayMetagameComponent } from './tournoi/display-metagame/display-metagame.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 const appRoutes: Routes = [
   {path: 'auth/signup', component: SignupComponent},
@@ -88,7 +89,8 @@ const appRoutes: Routes = [
     RouterModule.forRoot(appRoutes),
     NgSelectModule,
     MatAutocompleteModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    BrowserAnimationsModule
   ],
   providers: [
     AuthService,

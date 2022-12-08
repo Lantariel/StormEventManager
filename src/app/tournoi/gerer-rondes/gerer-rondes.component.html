@@ -7,11 +7,12 @@
 <button class="btn btn-primary" (click)="onSwitchPairings()">Modifier les pairings</button>
 <button class="btn btn-primary" (click)="onOpenJoueurs()">Classement / Gestion des joueurs</button>
 <button class="btn btn-primary" (click)="onPreviousRounds()">Rondes précédentes</button>
-<button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement</button>
+<button class="btn btn-primary" (click)="onOpenDisplayInfos()">Placement des joueurs</button>
 <button class="btn btn-primary" (click)="onDisplayMetagame()">Metagame</button>
+<button class="btn btn-primary" (click)="onTogleDeckcheck()">Deckcheck</button>
 <hr/>
 <div class="row">
-  <div class="col-md-3">
+  <div class="col-md-4">
     <form [formGroup]="formSearchForTable">
       <div class="form-group">
         <label for="research">Chercher une table ou un joueur:</label>
@@ -21,13 +22,13 @@
     <div class="match" *ngFor="let match of matchsEnCours ; let i = index" (click)="this.setFocusTable(i + 1)">
       <div [class.finishedMatch]="match.scoreAlreadySubmitted === true" [class.hideFromResearch]="!this.matchResearch(i)">
         <div class="row" *ngIf="(match.scoreAlreadySubmitted === true && this.displayFinishedMatches === true) || match.scoreAlreadySubmitted === false && match.joueur1.playerID !== '15000' ">
-          <div class="col">
-              <p><b>Table {{ match.table }}</b><br/>
-                {{ match.joueur1.firstName }} {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
-                {{ match.joueur2.firstName }} {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
+          <div class="col-sm-8">
+            <p><b>Table {{ match.table }}</b><span class="timeDisplay" *ngIf="match.additionalTime > 0"> +{{ match.additionalTime }} mins</span><br/>
+                {{ match.joueur1.firstName }} "{{ match.joueur1.nickname }}" {{ match.joueur1.lastName }} [{{match.joueur1.score}}]<br/>
+                {{ match.joueur2.firstName }} "{{ match.joueur2.nickname }}" {{ match.joueur2.lastName }} [{{ match.joueur2.score }}]</p>
               <hr/>
           </div>
-          <div class="col">
+          <div class="col-sm-4">
             <img *ngIf="match.joueur1.commanderImgUrl !== 'x'" class="cmdImg" src="{{ match.joueur1.commanderImgUrl }}" alt="{{ match.joueur1.commander }}">
             <img *ngIf="match.joueur2.commanderImgUrl !== 'x'" class="cmdImg" src="{{ match.joueur2.commanderImgUrl }}" alt="{{ match.joueur2.commander }}">
           </div>
@@ -36,21 +37,31 @@
     </div>
   </div>
   <div class="col-md-5">
-    <div *ngIf="tableFocus !== 0">
+    <div *ngIf="tableFocus !== 0" class="middlepannel sticky-top">
       <div class="focusTable">
         <h4>Table {{ this.tableFocus }}</h4>
+        <p class="timeDisplay" *ngIf="matchsEnCours[this.tableFocus - 1].additionalTime > 0">+ {{ matchsEnCours[this.tableFocus - 1].additionalTime }} min</p>
         <p>{{ matchsEnCours[this.tableFocus - 1].joueur1.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur1.lastName }} VS {{ matchsEnCours[this.tableFocus - 1].joueur2.firstName }} {{ matchsEnCours[this.tableFocus - 1].joueur2.lastName }}</p>
         <p>{{ matchsEnCours[this.tableFocus - 1].scoreJ1 }} - {{ matchsEnCours[this.tableFocus - 1].scoreJ2 }}</p>
         <form [formGroup]="formScores" (ngSubmit)="onSetScore(this.tableFocus - 1)">
           <div class="form-group">
-            <input type="number" class="form-control score" id="scorej1" formControlName="scorej1" autocomplete="off">
+            drop : <input type="checkbox" [checked]="player1Dropped(this.tableFocus - 1)" id="dropj1" formControlName="dropj1"> <input type="number" class="form-control score" id="scorej1" formControlName="scorej1" autocomplete="off">
             -
-            <input type="number" class="form-control score" id="scorej2" formControlName="scorej2" autocomplete="off">
+            <input type="number" class="form-control score" id="scorej2" formControlName="scorej2" autocomplete="off"> <input type="checkbox" [checked]="player2Dropped(this.tableFocus - 1)" id="dropj2" formControlName="dropj2"> : drop
           </div>
           <button class="btn btn-primary" type="submit">Valider score</button>
         </form>
       </div>
       <hr/>
+      <div>
+        <h4>Attribuer du temps additionel</h4>
+       <form [formGroup]="formAdditionalTime" (ngSubmit)="onSetAdditionalTime(this.tableFocus - 1)">
+         <div class="form-group">
+           <input type="number" class="form-control timeinput" id="timevalue" formControlName="timevalue" autocomplete="off">
+           <button class="btn btn-primary" type="submit">Ajouter du temps</button>
+         </div>
+       </form>
+      </div>
       <div>
         <h4>Pénalités</h4>
           <div id="penaltyJ1" class="penalyList">
@@ -133,7 +144,18 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
+    <div *ngIf="displayDeckCheckOptions === true">
+      <h4>Options de deckcheck :</h4>
+      <button class="btn btn-dark" (click)="onGetDeckCheckAtRandom()">Table au hasard</button>
+      <form [formGroup]="formDeckCheck">
+        <div class="form-group">
+          <input type="number" class="form-control score" id="tableToCheck" formControlName="tableToCheck">
+          <button class="btn btn-success" (click)="onDeckCheckSpecificTable()">Valider</button>
+        </div>
+      </form>
+      <hr/>
+    </div>
     <h4>Résultats :</h4>
     <hr/>
     <div *ngFor="let match of matchsEnCours ; let i = index">

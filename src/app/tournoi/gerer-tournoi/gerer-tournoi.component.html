@@ -5,12 +5,12 @@
   <div class="col">
     <h3>Paramètres du tournoi</h3>
     <div><b>Format :</b> {{ tournoi.format }}</div>
+    <div><b>Date :</b> {{ tournoi.tournamentDate }}</div>
     <div><b>Joueurs inscrits : </b>{{ this.nombreDeJoueurs }}</div>
     <div><b>Nombre de rondes : </b> {{ tournoi.nombreDeRondes }}</div>
     <div *ngIf="tournoi.finalBracket"><b>Phases éliminatoires : </b>Oui (top {{ tournoi.tournamentCut }})</div>
     <div *ngIf="!tournoi.finalBracket"><b>Phases éliminatoires : </b> Non</div>
     <hr/>
-
     <div>
       <form [formGroup]="formRondes" *ngIf="forceRoundNumber === null">
         <div class="form-group">
@@ -43,12 +43,26 @@
       <hr/>
       <button class="btn btn-success" *ngIf="tournoi.isLive === false" [disabled]="tournoi.nombreDeRondes < 1" (click)="onCommencerTournoi()">Passer au pré-lancement</button>
       <button class="btn btn-success" *ngIf="tournoi.isLive === true" (click)="routeToRondes()">Ronde en cours</button>
+      <hr/>
+      <div>
+        <form [formGroup]="formEditor">
+          <div class="form-group">
+            <label for="editor">Ajouter un éditeur (email):</label>
+            <input class="form-control" type="text" id="editor" formControlName="editor">
+          </div>
+          <button class="btn btn-primary" (click)="onAddEditor()">Ajouter éditeur</button>
+        </form>
+        <b>Editeurs :</b>
+        <div *ngFor="let editor of tournoi.editors ; let k = index">
+          <div *ngIf="k !== 0">
+            {{ editor }} <button class="btn btn-danger" (click)="onDeleteEditor(k)">x</button>
+          </div>
+        </div>
+      </div>
     </div>
-
   </div>
 
   <div class="col">
-
     <h3>Rechercher un joueur</h3>
     <form [formGroup]="formRecherche" (ngSubmit)="onChercherJoueurLocal()">
       <div class="form-group">

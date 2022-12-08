@@ -41,6 +41,7 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
   formRondes: FormGroup ; // Formulaire pour forcer un nombre de rondes
   formTop: FormGroup ; // Formulaire pour fixer les phases éliminatoires
   formRegResearch: FormGroup ; // Recherche d'un joueur inscrit
+  formEditor: FormGroup ; // Gère les droits de gestion du tournoi
 
 /* === Recherche d'un joueur dans la base de donnée ==== */
 
@@ -104,6 +105,10 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.formRegResearch = this.formBuilder.group({
       regSearch: ['']
     }) ;
+
+    this.formEditor = this.formBuilder.group({
+      editor: ['', Validators.required]
+    }) ;
   }
 
   onInitRecherche() {
@@ -131,7 +136,10 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     for (let i = 0 ; i < this.joueurs.length ; i++) // Parcours du tableau des joueurs pour trouver celui qu'on cherche
     {
       if (id === this.joueurs[i].playerID.toString())
-      { this.tempJoueur = this.joueurs[i] ; }
+      {
+        this.tempJoueur = this.joueurs[i] ;
+        this.tempJoueur.eloValue = this.joueurs[i].eloValue ;
+      }
     }
 
     if (this.tournoi.registeredPlayers)
@@ -251,6 +259,18 @@ export class GererTournoiComponent implements OnInit, OnDestroy {
     this.forcerNombreDeRondes(nb) ;
     this.formRondes.reset() ;
     this.tournoi.roundNumberIsFixed = true ;
+  }
+
+  onAddEditor(){
+    const edit = this.formEditor.get('editor').value ;
+    this.tournoi.editors.push(edit) ;
+    this.formEditor.reset() ;
+    this.tournoiService.addEditor(this.tournoi.tournamentId, edit) ;
+  }
+
+  onDeleteEditor(id: number){
+    this.tournoi.editors.splice(id, 1) ;
+    this.tournoiService.removeEditor(this.tournoi.tournamentId, id) ;
   }
 
   onSetTournamentTop() {

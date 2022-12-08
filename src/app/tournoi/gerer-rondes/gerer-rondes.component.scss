@@ -13,6 +13,7 @@
 
 .match {
   cursor: pointer;
+  width: 100%;
 }
 
 .match:hover{
@@ -28,6 +29,13 @@
 }
 
 .score{
+  width: 60px;
+  height: 40px ;
+  display: inline;
+  margin: 5px ;
+}
+
+.timeinput{
   width: 60px;
   height: 40px ;
   display: inline;
@@ -67,4 +75,13 @@
 
 #commander{
   text-align: center;
+}
+
+.middlepannel{
+  padding-top: 20px;
+}
+
+.timeDisplay{
+  color: red ;
+  font-weight: bold;
 }

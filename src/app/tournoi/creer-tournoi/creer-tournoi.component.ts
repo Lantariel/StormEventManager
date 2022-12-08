@@ -18,14 +18,23 @@ export class CreerTournoiComponent implements OnInit {
               private tournoiService: TournoiService,
               private router: Router) { }
 
-  ngOnInit(): void { this.initForm() ; }
+  ngOnInit(): void {
+    this.initForm() ;
+    this.setDefaultDate() ;
+  }
+
+  setDefaultDate(){
+    const today = new Date().toLocaleDateString("en-CA") ;
+    this.tournoiForm.controls['tournamentDate'].setValue(today) ;
+  }
 
   initForm() {
     this.tournoiForm = this.formBuilder.group({
       tournamentName: ['', Validators.required],
       tournamentFormat: ['', Validators.required],
       tournamentType: ['', Validators.required],
-      tournamentPlace: ['', Validators.required]
+      tournamentPlace: ['', Validators.required],
+      tournamentDate: ['', Validators.required]
     });
   }
 
@@ -34,9 +43,11 @@ export class CreerTournoiComponent implements OnInit {
     const tournamentFormat = this.tournoiForm.get('tournamentFormat').value ;
     const tournamentType = this.tournoiForm.get('tournamentType').value ;
     const tournamentPlace = this.tournoiForm.get('tournamentPlace').value ;
+    const tournamentDate = this.tournoiForm.get('tournamentDate').value ;
     const newTournoi = new Tournoi(tournamentName, tournamentFormat, this.tournoiService.tournois.length) ;
     newTournoi.tournamentType = tournamentType ;
     newTournoi.tournamentPlace = tournamentPlace ;
+    newTournoi.tournamentDate = tournamentDate ;
 
     newTournoi.rondeEnCours = 0 ;
     newTournoi.isLive = false ;

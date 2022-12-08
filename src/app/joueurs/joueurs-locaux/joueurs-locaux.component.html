@@ -1,5 +1,6 @@
 <div class="row">
   <div class="col-xl-12">
+    <button class="btn btn-primary" (click)="onAjouterJoueur()">Ajouter un joueur</button>
     <form [formGroup]="chercherJoueur">
       <div class="form-group">
         <label for="search">Recherche :</label>
@@ -45,6 +46,5 @@
       </tbody>
     </table>
     </form>
-    <button class="btn btn-primary" (click)="onAjouterJoueur()">Ajouter un joueur</button>
   </div>
 </div>

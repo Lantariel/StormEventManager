@@ -113,4 +113,11 @@ export class JoueursLocauxComponent implements OnInit {
 
     this.onCancelEdit() ;
   }
+
+  /*setEloValue(){
+    for (let i = 0 ; i < this.joueurs.length ; i++)
+    { this.joueurs[i].eloValue = 1000 ; }
+    this.joueurService.sauvegarderJoueurs() ;
+    this.joueurService.emitPlayers() ;
+  }*/
 }

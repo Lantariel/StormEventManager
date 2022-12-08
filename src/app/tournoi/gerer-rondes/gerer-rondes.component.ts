@@ -29,11 +29,15 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   formScores: FormGroup;
   formPenalty: FormGroup ;
   formSearchForTable: FormGroup ;
+  formAdditionalTime: FormGroup ;
+  formDeckCheck: FormGroup ;
 
   tableFocus: number;
   displayFinishedMatches: boolean;
   displayPenaltyForm: boolean ;
   displayCreateMatchesButton: boolean ;
+  displayDeckCheckOptions: boolean ;
+
   rondeActuelle: Ronde ;
   roundNumber: number ;
   matchsEnCours: Match[] ;
@@ -68,9 +72,10 @@ export class GererRondesComponent implements OnInit, OnDestroy {
         }
       }) ;
 
-    this.tableFocus = 0;
+    this.tableFocus = 0 ;
     this.displayFinishedMatches = false ;
     this.displayPenaltyForm = false ;
+    this.displayDeckCheckOptions = false ;
 
     this.initForm();
   }
@@ -78,7 +83,9 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   initForm() {
     this.formScores = this.formBuilder.group({
       scorej1: ['', Validators.required],
-      scorej2: ['', Validators.required]
+      scorej2: ['', Validators.required],
+      dropj1: [false],
+      dropj2: [false]
     });
 
     this.formPenalty = this.formBuilder.group({
@@ -91,6 +98,14 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
     this.formSearchForTable = this.formBuilder.group({
       research: ['', Validators.required]
+    }) ;
+
+    this.formAdditionalTime = this.formBuilder.group({
+      timevalue: [0, Validators.required]
+    }) ;
+
+    this.formDeckCheck = this.formBuilder.group({
+      tableToCheck: ['', Validators.required]
     }) ;
   }
 
@@ -118,18 +133,47 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     }
   }
 
+  onTogleDeckcheck(){
+    this.displayDeckCheckOptions = this.displayDeckCheckOptions !== true;
+  }
+
+  onGetDeckCheckAtRandom(){
+    this.formDeckCheck.get("tableToCheck").setValue(this.tournoiService.getTableToDeckCheck(this.tournoi.tournamentName)) ;
+  }
+
+  onDeckCheckSpecificTable(){
+    const matchId = this.formDeckCheck.get("tableToCheck").value - 1 ;
+    const idJ1 = this.tournoi.currentMatches[matchId].joueur1.playerIndexInEvent ;
+    const idJ2 = this.tournoi.currentMatches[matchId].joueur2.playerIndexInEvent ;
+    this.tournoiService.setDeckCheckStatus(this.tournoi.tournamentName, [idJ1, idJ2], true) ;
+    this.formDeckCheck.reset() ;
+  }
+
   /*  === GESTION DES MATCHS === */
 
   setFocusTable(id: number) {
     this.tableFocus = id;
+    if (this.matchsEnCours[id - 1].scoreAlreadySubmitted === true)
+    {
+      this.formScores.get("scorej1").setValue(this.matchsEnCours[id - 1].scoreJ1) ;
+      this.formScores.get("scorej2").setValue(this.matchsEnCours[id - 1].scoreJ2) ;
+    }
+    else { this.formScores.reset() ; }
+  }
+
+  player1Dropped(id: number){
+    return this.matchsEnCours[id].dropj1 ;
+  }
+
+  player2Dropped(id: number){
+    return this.matchsEnCours[id].dropj2 ;
   }
 
   onCreateMatches(){
 
-   if (this.tournoi.rondeEnCours === this.tournoi.nombreDeRondes)
-   { this.tournoiService.createLastRoundPairings(this.tournoi.tournamentName) ; }
-   else
-   { this.tournoiService.createPairingsFromStandings(this.tournoi.tournamentName) ; }
+   if (this.tournoi.rondeEnCours === this.tournoi.nombreDeRondes) { this.tournoiService.createLastRoundPairings(this.tournoi.tournamentName) ; }
+   else if (this.tournoi.rondeEnCours === 1) { this.tournoiService.createFirstRoundPairings(this.tournoi.tournamentName) ; }
+   else { this.tournoiService.createPairingsFromStandingsRecursive(this.tournoi.tournamentName) ; }
 
    this.matchsEnCours = this.tournoiService.tournois[this.currentTournamentIndex].currentMatches ;
    this.displayCreateMatchesButton = false ;
@@ -158,9 +202,30 @@ export class GererRondesComponent implements OnInit, OnDestroy {
         return this.tournoi.currentMatches[table].joueur1.firstName.toLowerCase().search(research.toLowerCase()) !== -1
           || this.tournoi.currentMatches[table].joueur1.lastName.toLowerCase().search(research.toLowerCase()) !== -1
           || this.tournoi.currentMatches[table].joueur2.firstName.toLowerCase().search(research.toLowerCase()) !== -1
-          || this.tournoi.currentMatches[table].joueur2.lastName.toLowerCase().search(research.toLowerCase()) !== -1;
+          || this.tournoi.currentMatches[table].joueur2.lastName.toLowerCase().search(research.toLowerCase()) !== -1
+          || this.tournoi.currentMatches[table].joueur1.nickname.toLowerCase().search(research.toLowerCase()) !== -1
+          || this.tournoi.currentMatches[table].joueur2.nickname.toLowerCase().search(research.toLowerCase()) !== -1 ;
       }
     }
+  }
+
+  onSetAdditionalTime(id: number){
+    const timevalue = this.formAdditionalTime.get("timevalue").value ;
+    this.matchsEnCours[id].additionalTime += timevalue ;
+
+    if (this.matchsEnCours[id].additionalTime < 0) { this.matchsEnCours[id].additionalTime = 0 ; }
+
+    this.tournoiService.setAdditionalTime(this.tournoi.tournamentName, id, timevalue) ;
+    this.formAdditionalTime.get("timevalue").setValue(0) ;
+  }
+
+  hasAdditionalTime(matchId: number){
+    let hastime = false ;
+
+    if (this.tournoi.currentMatches[matchId].additionalTime > 0)
+    { hastime = true ; }
+
+    return hastime ;
   }
 
   /* === GESTION DES SCORES === */
@@ -191,6 +256,8 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   onSetScore(matchID: number){
     let score1 = this.formScores.get("scorej1").value ;
     let score2 = this.formScores.get("scorej2").value ;
+    const dropj1 = this.formScores.get("dropj1").value ;
+    const dropj2 = this.formScores.get("dropj2").value ;
 
     if (score1)
     {
@@ -211,9 +278,12 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     this.matchsEnCours[matchID].scoreJ1 = score1 ;
     this.matchsEnCours[matchID].scoreJ2 = score2 ;
     this.matchsEnCours[matchID].scoreAlreadySubmitted = true ;
+    this.matchsEnCours[matchID].dropj1 = dropj1 ;
+    this.matchsEnCours[matchID].dropj2 = dropj2 ;
 
-    this.tournoiService.enterScore(this.tournoi.tournamentName, matchID, score1, score2) ;
+    this.tournoiService.enterScore(this.tournoi.tournamentName, matchID, score1, score2, this.tournoi, dropj1, dropj2) ;
     this.formScores.reset() ;
+    this.tableFocus++ ;
 }
 
   /* === GESTION DES PENALITES === */
@@ -296,6 +366,10 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
   getRandom(floor: number, ceiling: number) {
     return Math.floor(Math.random() * (ceiling - floor + 1)) + floor;
+  }
+
+  playersHasPartner(joueur: Joueur){
+    return joueur.partner !== null;
   }
 
   ngOnDestroy() {

@@ -9,6 +9,7 @@ export class Tournoi {
   public nombreDeRondes: number ;
   public tournamentType: string ;
   public tournamentPlace: string ;
+  public editors: string[] = [];
 
   /* Etats du tournoi */
   public rondeEnCours: number ;
@@ -25,6 +26,7 @@ export class Tournoi {
   public currentMatches: Match[] = [] ;
   public tournamentCut: number ;
   public finalBracket: boolean ;
+  public tournamentDate: number[] ;
 
   constructor(public tournamentName: string, public format: string, public tournamentId: number) {
     this.registeredPlayers = [] ;

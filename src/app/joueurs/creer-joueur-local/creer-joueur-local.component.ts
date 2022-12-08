@@ -51,6 +51,7 @@ export class CreerJoueurLocalComponent implements OnInit {
     const newJoueur = new Joueur(firstName, lastname, playerID) ;
     newJoueur.playerIndex = index ;
     newJoueur.nickname = nickname ;
+    newJoueur.eloValue = 1000 ;
 
     this.joueurLocalForm.reset() ;
 

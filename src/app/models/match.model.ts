@@ -7,7 +7,10 @@ export class Match {
   public scoreJ1: number ; // Score du joueur 1 dans le match
   public scoreJ2: number ; // Score du joueur 2 dans le match
   public scoreAlreadySubmitted: boolean ; // False si aucun score n'a encore été rentré
-  public table: number ;
+  public table: any ;
+  public additionalTime: number ;
+  public dropj1: boolean ;
+  public dropj2: boolean ;
 
   /* Composants du match */
   public joueur1: Joueur ; // Joueur 1 au sein du match
@@ -19,5 +22,8 @@ export class Match {
     this.scoreJ2 = 0 ;
     this.joueur1 = jo1 ;
     this.joueur2 = jo2 ;
+    this.additionalTime = 0 ;
+    this.dropj1 = false ;
+    this.dropj2 = false ;
   }
 }
