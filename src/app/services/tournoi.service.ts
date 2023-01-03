@@ -1160,6 +1160,8 @@ export class TournoiService {
     let totalMatchPlayed: number ;
     let totalMatchWon: number ;
     let targetId: number ;
+    let matchratio: number ;
+    let oppopersoratio: number ;
 
     this.updatePersonnalWinrates(tnId) ;
     // calcul des winrate des adversaires
@@ -1167,8 +1169,11 @@ export class TournoiService {
     {
       totalGamesPlayed = 0 ;
       totalGamesWon = 0 ;
+      matchratio = 0 ;
+      oppopersoratio = 0 ;
+      /*
       totalMatchPlayed = 0 ;
-      totalMatchWon = 0 ;
+      totalMatchWon = 0 ;*/
 
       for (let y = 0; y < this.tournois[tnId].registeredPlayers[i].previousOpponents.length ; y++)
       {
@@ -1178,8 +1183,16 @@ export class TournoiService {
         {
           totalGamesPlayed += this.tournois[tnId].registeredPlayers[targetId].gamesPlayed ;
           totalGamesWon += this.tournois[tnId].registeredPlayers[targetId].gameWins ;
+          oppopersoratio = this.tournois[tnId].registeredPlayers[targetId].matchWins / this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
+          if (oppopersoratio > 1/3)
+          {
+            matchratio += this.tournois[tnId].registeredPlayers[targetId].matchWins / this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
+
+          }
+          else matchratio += 1/3 ;
+          /*
           totalMatchPlayed += this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
-          totalMatchWon += this.tournois[tnId].registeredPlayers[targetId].matchWins ;
+          totalMatchWon += this.tournois[tnId].registeredPlayers[targetId].matchWins ;*/
         }
         else // Si target ID est un bye
         {
@@ -1198,7 +1211,7 @@ export class TournoiService {
         }
 
         this.tournois[tnId].registeredPlayers[i].opponentsGameWinRate = totalGamesWon / totalGamesPlayed ;
-        this.tournois[tnId].registeredPlayers[i].opponentsMatchWinRate = totalMatchWon / totalMatchPlayed ;
+        this.tournois[tnId].registeredPlayers[i].opponentsMatchWinRate = matchratio / this.tournois[tnId].rondeEnCours ;
       }
     }
   }

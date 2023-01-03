@@ -67,7 +67,7 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
   }
 
   onOpenTournoi(id: number) {
-    this.router.navigate(['/gerertournoi', id]) ;
+    this.router.navigate(['/gerertournoi', this.tournois[id].tournamentId]) ;
   }
 
   ngOnDestroy() {
@@ -75,7 +75,7 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
   }
 
   onOpenRondes(id){
-    this.router.navigate(['gererronde', id]);
+    this.router.navigate(['gererronde', this.tournois[id].tournamentId]);
   }
 
   onOpenTop(id){

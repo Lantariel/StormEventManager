@@ -57,7 +57,6 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     this.displayCreateMatchesButton = true ;
 
     this.tournoiService.getTournois();
-    this.tournoiService.emitTournois();
 
     this.tournoiService.getSingleTournoi(this.currentTournamentIndex).then(
       (tournoi: Tournoi) => {
@@ -71,6 +70,7 @@ export class GererRondesComponent implements OnInit, OnDestroy {
           this.displayCreateMatchesButton = false ;
         }
       }) ;
+    this.tournoiService.emitTournois();
 
     this.tableFocus = 0 ;
     this.displayFinishedMatches = false ;
