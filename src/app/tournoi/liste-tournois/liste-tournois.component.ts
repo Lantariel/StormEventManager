@@ -44,7 +44,7 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
         this.tournois = [] ;
         for (let i = 0 ; i < tournois.length ; i++)
         {
-          if (this.checkTournamentEditors(tournois[i]))
+          if (this.checkTournamentEditors(tournois[i]) && !tournois[i].archived)
           { this.tournois.push(tournois[i]) ; }
         }
         //this.tournois = tournois ;
@@ -62,8 +62,17 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
   }
 
   onDeleteTournoi(tournoi: Tournoi) {
+
+    /*this.tournois[tnId].archived = true ;
+    this.tournoiService.archiveEvent(tnId) ;
+    this.hideEvent(tnId) ;*/
+
     this.tournoiService.supprimerTournoi(tournoi) ;
     this.hideDelete() ;
+  }
+
+  hideEvent(tnId: number){
+    this.tournois.splice(tnId, 1) ;
   }
 
   onOpenTournoi(id: number) {
@@ -108,5 +117,4 @@ export class ListeTournoisComponent implements OnInit, OnDestroy {
     }
     return isEditor ;
   }
-
 }

@@ -18,6 +18,9 @@ export class Tournoi {
   public roundNumberIsFixed: boolean ;
   public isFinished: boolean ;
   public step: string ;
+  public archived: boolean ;
+  public status: string ; // can be : register, live, pending, published
+  public livePublish: boolean ;
 
   /* composants du tournoi */
   public rondes: Ronde[] ;
@@ -37,5 +40,7 @@ export class Tournoi {
     this.step = 'rounds' ;
     this.tournamentCut = 8 ;
     this.finalBracket = true ;
+    this.status = 'register' ;
+    this.livePublish = false ;
   }
 }

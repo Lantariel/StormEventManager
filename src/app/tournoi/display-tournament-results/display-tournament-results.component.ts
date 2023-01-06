@@ -42,7 +42,7 @@ export class DisplayTournamentResultsComponent implements OnInit {
     this.tournoiService.getSingleTournoi(this.currentTournamentIndex).then(
       (tournoi: Tournoi) => {
         this.tournoi = tournoi ;
-        this.joueursDuTournoi = this.tournoi.currentStanding ;
+        this.joueursDuTournoi = this.tournoiService.getStandings(this.tournoi.registeredPlayers) ;
       }) ;
 
     this.playerFocus = -1 ;

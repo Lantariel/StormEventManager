@@ -70,7 +70,7 @@ export class GererJoueursComponent implements OnInit {
     this.tournoiService.getSingleTournoi(this.currentTournamentIndex).then(
       (tournoi: Tournoi) => {
         this.tournoi = tournoi ;
-        this.joueursDuTournoi = this.tournoi.currentStanding ;
+        this.joueursDuTournoi = this.tournoiService.getStandings(this.tournoi.registeredPlayers) ;
       }) ;
 
     this.playerFocus = -1 ;
@@ -256,7 +256,7 @@ export class GererJoueursComponent implements OnInit {
     const decklist = this.formDecklist.get('decklist').value ;
     this.tournoiService.setDecklist(this.tournoi.tournamentId, playerId, decklist) ;
     this.joueursDuTournoi[this.playerFocus].decklist = decklist ;
-    this.tournoiService.updateStandingFromScratch(this.tournoi.tournamentName) ;
+    //this.tournoiService.updateStandingFromScratch(this.tournoi.tournamentName) ;
     this.formDecklist.reset() ;
   }
 
