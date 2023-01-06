@@ -1,15 +1,14 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Tournoi} from '../models/tournoi.model';
-import { Match } from '../models/match.model';
+import {Match} from '../models/match.model';
 import {Subject} from 'rxjs';
-import { firebase } from '@firebase/app';
-import '@firebase/auth' ;
+import {firebase} from '@firebase/app';
+import '@firebase/auth';
 import '@firebase/database';
-import '@firebase/storage' ;
+import '@firebase/storage';
 import {Joueur} from '../models/joueur.model';
 import {HttpClient} from '@angular/common/http';
 import {Ronde} from '../models/ronde.model';
-import {max, pluck} from 'rxjs/operators';
 import {Penalty} from '../models/penalty.model';
 
 @Injectable({
@@ -24,7 +23,6 @@ export class TournoiService {
   constructor(private httpClient: HttpClient) { }
 
   /* === DATABASE === */
-
   emitTournois() {
     this.tournoisSubject.next(this.tournois) ;
   }
@@ -151,6 +149,7 @@ export class TournoiService {
     }
 
     this.tournois[id].currentStanding = this.shuffleInPlace(this.tournois[id].registeredPlayers) ;
+    this.tournois[id].status = 'live' ;
 
     for (let i = 0 ; i < this.tournois[id].registeredPlayers.length ; i++) {
       this.tournois[id].registeredPlayers[i].playerIndexInEvent = i ;
@@ -202,8 +201,8 @@ export class TournoiService {
       tempWinner = this.tournois[tnId].currentMatches[0].joueur2 ;
       tempLooser = this.tournois[tnId].currentMatches[0].joueur1 ;
     }
-    this.tournois[tnId].currentStanding[0] = tempWinner ;
-    this.tournois[tnId].currentStanding[1] = tempLooser ;
+    this.getStandings(this.tournois[tnId].registeredPlayers)[0] = tempWinner ;
+    this.getStandings(this.tournois[tnId].registeredPlayers)[1] = tempLooser ;
   }
 
   uploadDecksStats(tnId: number){
@@ -222,6 +221,12 @@ export class TournoiService {
     else
     { console.log("owner cannot be removed") ; }
 
+    this.saveTournoi() ;
+    this.emitTournois() ;
+  }
+
+  archiveEvent(tnId: number){
+    this.tournois[tnId].archived = true ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
@@ -413,12 +418,13 @@ export class TournoiService {
     let playersToPair: Joueur[] = [] ;
     let playerWithBye: Joueur = null ;
     let pairingResult: any ;
+    const tournamentStanding: Joueur[] = this.getStandings(this.tournois[tnId].registeredPlayers) ;
 
     // ----- définir les joueurs à pairer -----
-    for (let i = 0 ; i < this.tournois[tnId].currentStanding.length ; i++)
+    for (let i = 0 ; i < tournamentStanding.length ; i++)
     {
-      if (this.tournois[tnId].currentStanding[i].status === 'active')
-      { playersToPair.push(this.tournois[tnId].currentStanding[i]) ; }
+      if (tournamentStanding[i].status === 'active')
+      { playersToPair.push(tournamentStanding[i]) ; }
     }
     // ----- Attribution du bye si nécessaire -----
 
@@ -488,18 +494,12 @@ export class TournoiService {
         {
             if (targetPlayer === tabJoueurs.length - 1) // cas dernier joueur
             {
-              //tabMatches = this.handleLastPlayerCantBePaired(tabJoueurs[0], tabMatches) ;
               return false ;
             }
             else return false ; // le pairing n'est pas possible
         }
       }
     }
-  }
-
-  handleLastPlayerCantBePaired(player: Joueur, matches: Match[]){
-
-    return matches ;
   }
 
   createFirstRoundPairings(tnName: string){
@@ -577,12 +577,13 @@ export class TournoiService {
     const playersToPair: Joueur[] = [] ;
     let playerWithBye: Joueur = null ;
     let pairingResult: any ;
+    const tournamentStanding: Joueur[] = this.getStandings(this.tournois[tnId].registeredPlayers) ;
 
     // ----- définir les joueurs à pairer -----
-    for (let i = 0 ; i < this.tournois[tnId].currentStanding.length ; i++)
+    for (let i = 0 ; i < tournamentStanding.length ; i++)
     {
-      if (this.tournois[tnId].currentStanding[i].status === 'active')
-      { playersToPair.push(this.tournois[tnId].currentStanding[i]) ; }
+      if (tournamentStanding[i].status === 'active')
+      { playersToPair.push(tournamentStanding[i]) ; }
     }
 
     // ----- Attribution du bye si nécessaire -----
@@ -790,11 +791,12 @@ export class TournoiService {
   createFinalMatches(tnName: string){
     const tnId = this.findTournamentIdByName(tnName) ;
     const players: Joueur[] = [] ;
+    const tournamentStanding = this.getStandings(this.tournois[tnId].registeredPlayers) ;
 
-    for (let i = 0 ; i < this.tournois[tnId].currentStanding.length ; i++)
+    for (let i = 0 ; i < tournamentStanding.length ; i++)
     {
-      if (this.tournois[tnId].currentStanding[i].status === 'active')
-      { players.push(this.tournois[tnId].currentStanding[i]) ; }
+      if (tournamentStanding[i].status === 'active')
+      { players.push(tournamentStanding[i]) ; }
     }
 
     const half = players.length / 2 - 1 ;
@@ -893,7 +895,7 @@ export class TournoiService {
     { tempTop.push(tempLoosers[i]) ; }
 
     for (let i = 0 ; i < tempTop.length ; i++)
-    { this.tournois[tnId].currentStanding[i] = tempTop[i] ; }
+    { this.getStandings(this.tournois[tnId].registeredPlayers)[i] = tempTop[i] ; }
 
     this.saveTournoi() ;
     this.emitTournois() ;
@@ -926,7 +928,7 @@ export class TournoiService {
           if (this.checkIfPlayerHadBye(tnId, this.tournois[tnId].currentMatches[i].joueur1.playerIndexInEvent))
           {
             let swaped = false ;
-            let minScore = this.getMinScore(this.tournois[tnId].currentStanding) ;
+            let minScore = this.getMinScore(this.getStandings(this.tournois[tnId].registeredPlayers)) ;
 
             // Recherche du premier match disponible avec un joueur au score minimum et qui n'a jamais été en bye
             while (!swaped)
@@ -999,7 +1001,6 @@ export class TournoiService {
 
   /* == GESTION DES SCORES == */
 
-  // tslint:disable-next-line:typedef
   enterScore(tnName: string, matchId: number, score1: number, score2: number, tournament: Tournoi, drop1: boolean, drop2: boolean){
 
     const tnId = this.findTournamentIdByName(tnName) ;
@@ -1017,8 +1018,7 @@ export class TournoiService {
     this.emitTournois() ;
   }
 
-  // tslint:disable-next-line:typedef
-  lockMatchResults(tnName: string){
+  lockMatchResults(tnName: string): void{
 
     const tnId = this.findTournamentIdByName(tnName) ;
     let idJ1: number ;
@@ -1027,6 +1027,7 @@ export class TournoiService {
     let score2: number ;
     let totalGames: number ;
 
+    // tslint:disable-next-line:prefer-for-of
     for (let i = 0 ; i < this.tournois[tnId].currentMatches.length ; i++)
     {
       idJ1 = this.tournois[tnId].currentMatches[i].joueur1.playerIndexInEvent ;
@@ -1085,7 +1086,9 @@ export class TournoiService {
           this.tournois[tnId].registeredPlayers[idJ2].gamesPlayed += totalGames ; // Parties jouées
           this.tournois[tnId].registeredPlayers[idJ2].matchsPlayed++ ; // Matchs joués
           this.tournois[tnId].registeredPlayers[idJ2].loss++ ; // défaites
+          // tslint:disable-next-line:max-line-length
           this.tournois[tnId].registeredPlayers[idJ2].previousOpponents.push(this.tournois[tnId].registeredPlayers[idJ1].playerIndexInEvent) ;
+          // tslint:disable-next-line:max-line-length
           this.tournois[tnId].registeredPlayers[idJ1].previousOpponents.push(this.tournois[tnId].registeredPlayers[idJ2].playerIndexInEvent) ;
 
           if (this.tournois[tnId].rondeEnCours === 1)
@@ -1136,6 +1139,7 @@ export class TournoiService {
       if (this.tournois[tnId].currentMatches[i].dropj2 === true) { this.tournois[tnId].registeredPlayers[idJ2].status = 'dropped' ; }
     }
 
+    // tslint:disable-next-line:prefer-for-of
     for (let i = 0 ; i < this.tournois[tnId].registeredPlayers.length ; i++)
     {
       if (this.tournois[tnId].registeredPlayers[i].status !== 'active')
@@ -1146,139 +1150,81 @@ export class TournoiService {
       }
     }
 
+    // tslint:disable-next-line:prefer-for-of
     for (let i = 0 ; i < this.tournois[tnId].currentMatches.length ; i++)
     { this.tournois[tnId].rondes[this.tournois[tnId].rondeEnCours - 1].matches.push(this.tournois[tnId].currentMatches[i]) ; }
     this.tournois[tnId].rondes[this.tournois[tnId].rondeEnCours - 1].matches.splice(0, 1) ;
     this.clearMatches(tnId) ;
   }
 
-  // tslint:disable-next-line:typedef
-  updateWinRates(tnName: string){
+  updateWinRates(tnName: string): void{
     const tnId = this.findTournamentIdByName(tnName) ;
-    let totalGamesPlayed: number ;
-    let totalGamesWon: number ;
-    let totalMatchPlayed: number ;
-    let totalMatchWon: number ;
-    let targetId: number ;
-    let matchratio: number ;
-    let oppopersoratio: number ;
-
     this.updatePersonnalWinrates(tnId) ;
+
     // calcul des winrate des adversaires
+    // tslint:disable-next-line:prefer-for-of
     for (let i = 0 ; i < this.tournois[tnId].registeredPlayers.length ; i++)
     {
-      totalGamesPlayed = 0 ;
-      totalGamesWon = 0 ;
-      matchratio = 0 ;
-      oppopersoratio = 0 ;
-      /*
-      totalMatchPlayed = 0 ;
-      totalMatchWon = 0 ;*/
+      let oppMWR = 0 ;
+      let oppGWR = 0 ;
 
-      for (let y = 0; y < this.tournois[tnId].registeredPlayers[i].previousOpponents.length ; y++)
+      // tslint:disable-next-line:prefer-for-of
+      for (let y = 0 ; y < this.tournois[tnId].registeredPlayers[i].previousOpponents.length ; y++)
       {
-        targetId = this.tournois[tnId].registeredPlayers[i].previousOpponents[y] ;
-
-        if (targetId !== 15000) // Si n'est pas un bye
+        if (this.tournois[tnId].registeredPlayers[i].previousOpponents[y] !== 15000)
         {
-          totalGamesPlayed += this.tournois[tnId].registeredPlayers[targetId].gamesPlayed ;
-          totalGamesWon += this.tournois[tnId].registeredPlayers[targetId].gameWins ;
-          oppopersoratio = this.tournois[tnId].registeredPlayers[targetId].matchWins / this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
-          if (oppopersoratio > 1/3)
-          {
-            matchratio += this.tournois[tnId].registeredPlayers[targetId].matchWins / this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
+          // tslint:disable-next-line:max-line-length
+          if (this.tournois[tnId].registeredPlayers[this.tournois[tnId].registeredPlayers[i].previousOpponents[y]].personnalMatchWinRate > (1 / 3))
+            // tslint:disable-next-line:max-line-length
+          { oppMWR += this.tournois[tnId].registeredPlayers[this.tournois[tnId].registeredPlayers[i].previousOpponents[y]].personnalMatchWinRate ; }
+          else { oppMWR += (1 / 3) ; }
 
-          }
-          else matchratio += 1/3 ;
-          /*
-          totalMatchPlayed += this.tournois[tnId].registeredPlayers[targetId].matchsPlayed ;
-          totalMatchWon += this.tournois[tnId].registeredPlayers[targetId].matchWins ;*/
+          // tslint:disable-next-line:max-line-length
+          if (this.tournois[tnId].registeredPlayers[this.tournois[tnId].registeredPlayers[i].previousOpponents[y]].personnalGameWinRate > (1 / 3))
+            // tslint:disable-next-line:max-line-length
+          { oppGWR += this.tournois[tnId].registeredPlayers[this.tournois[tnId].registeredPlayers[i].previousOpponents[y]].personnalGameWinRate ; }
+          else { oppGWR += (1 / 3) ; }
         }
-        else // Si target ID est un bye
-        {
-          if (this.tournois[tnId].rondeEnCours === 1)
-          {
-            totalGamesPlayed = 2 ;
-            totalMatchPlayed = 1 ;
-          }
-          else
-          {
-            totalGamesPlayed += this.tournois[tnId].rondes.length * 2 ;
-            totalGamesWon += this.tournois[tnId].rondes.length * 2 - 2 ;
-            totalMatchPlayed += this.tournois[tnId].rondes.length ;
-            totalMatchWon += this.tournois[tnId].rondes.length - 1 ;
-          }
-        }
-
-        this.tournois[tnId].registeredPlayers[i].opponentsGameWinRate = totalGamesWon / totalGamesPlayed ;
-        this.tournois[tnId].registeredPlayers[i].opponentsMatchWinRate = matchratio / this.tournois[tnId].rondeEnCours ;
       }
+
+      this.tournois[tnId].registeredPlayers[i].opponentsMatchWinRate = oppMWR / this.tournois[tnId].registeredPlayers[i].matchsPlayed ;
+      this.tournois[tnId].registeredPlayers[i].opponentsGameWinRate = oppGWR / this.tournois[tnId].registeredPlayers[i].gamesPlayed ;
     }
-  }
-
-  calculerClassement(tnName: string){
-
-    const tnId = this.findTournamentIdByName(tnName) ;
-    const rondeActuelle = this.tournois[tnId].rondeEnCours ;
-    let joueursAClasser: Joueur[] = [];
-
-    for (let i = 0 ; i < this.tournois[tnId].registeredPlayers.length ; i++)
-    { joueursAClasser.push(this.tournois[tnId].registeredPlayers[i]) ; }
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.opponentsGameWinRate - b.opponentsGameWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.personnalGameWinRate - b.personnalGameWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.opponentsMatchWinRate - b.opponentsMatchWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.score - b.score ;
-    }) ;
-
-    for (let i = joueursAClasser.length - 1 ; i >= 0 ; i--)
-    { this.tournois[tnId].rondes[rondeActuelle - 1].finalStandings.push(joueursAClasser[i]) ; }
-
-    this.tournois[tnId].rondes[rondeActuelle - 1].finalStandings.splice(0, 1) ;
-    this.tournois[tnId].currentStanding = this.tournois[tnId].rondes[rondeActuelle - 1].finalStandings ;
-  }
-
-  updateStandingFromScratch(tnName: string){
-    this.updatePlayerStatsFromScratch(tnName) ;
-    const tnId = this.findTournamentIdByName(tnName) ;
-
-    let joueursAClasser: Joueur[] = [] ;
-
-    for (let i = 0 ; i < this.tournois[tnId].registeredPlayers.length ; i++)
-    { joueursAClasser.push(this.tournois[tnId].registeredPlayers[i]) ; }
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.opponentsGameWinRate - b.opponentsGameWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.personnalGameWinRate - b.personnalGameWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.opponentsMatchWinRate - b.opponentsMatchWinRate ;
-    }) ;
-
-    joueursAClasser = joueursAClasser.sort(function(a, b){
-      return a.score - b.score ;
-    }) ;
-
-    this.tournois[tnId].currentStanding.splice(0, this.tournois[tnId].currentStanding.length) ;
-    for (let i = joueursAClasser.length - 1 ; i >= 0 ; i--)
-    { this.tournois[tnId].currentStanding.push(joueursAClasser[i]) ; }
 
     this.saveTournoi() ;
     this.emitTournois() ;
+  }
+
+  getStandings(playersTab: Joueur[]): Joueur[]{
+
+    const result: Joueur[] = [] ;
+
+    let joueursAClasser: Joueur[] = playersTab ;
+
+    joueursAClasser = joueursAClasser.sort(function(a, b){
+      return a.opponentsGameWinRate - b.opponentsGameWinRate ;
+    }) ;
+
+    joueursAClasser = joueursAClasser.sort(function(a, b){
+      return a.personnalGameWinRate - b.personnalGameWinRate ;
+    }) ;
+
+    joueursAClasser = joueursAClasser.sort(function(a, b){
+      return a.opponentsMatchWinRate - b.opponentsMatchWinRate ;
+    }) ;
+
+    joueursAClasser = joueursAClasser.sort(function(a, b){
+      return a.score - b.score ;
+    }) ;
+
+    for (let i = joueursAClasser.length - 1 ; i >= 0 ; i--)
+    { result.push(joueursAClasser[i]) ; }
+
+    return result ;
+  }
+
+  getPlayerFromId(playerId: number, tournoi: Tournoi): Joueur{
+    return tournoi.registeredPlayers[playerId] ;
   }
 
   updatePlayerStatsFromScratch(tnName: string){
@@ -1357,7 +1303,6 @@ export class TournoiService {
     this.tournois[tnId].registeredPlayers.splice(0, this.tournois[tnId].registeredPlayers.length) ;
     this.tournois[tnId].registeredPlayers = players ;
     this.updateWinRates(tnName) ;
-    this.updateStandingFromScratch(tnName) ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
@@ -1365,8 +1310,8 @@ export class TournoiService {
   updatePersonnalWinrates(tnId: number){
     for (let i = 0 ; i < this.tournois[tnId].registeredPlayers.length ; i++)
     {
-      this.tournois[tnId].registeredPlayers[i].personnalGameWinRate = this.tournois[tnId].registeredPlayers[i].gameWins / this.tournois[tnId].registeredPlayers[i].gamesPlayed  ;
-      this.tournois[tnId].registeredPlayers[i].personnalMatchWinRate = this.tournois[tnId].registeredPlayers[i].matchWins / this.tournois[tnId].registeredPlayers[i].matchsPlayed  ;
+      this.tournois[tnId].registeredPlayers[i].personnalMatchWinRate = this.tournois[tnId].registeredPlayers[i].score / (this.tournois[tnId].registeredPlayers[i].matchsPlayed * 3) ;
+      this.tournois[tnId].registeredPlayers[i].personnalGameWinRate = this.tournois[tnId].registeredPlayers[i].gameWins / this.tournois[tnId].registeredPlayers[i].gamesPlayed ;
     }
   }
 
@@ -1400,7 +1345,6 @@ export class TournoiService {
   dropPlayer(tnName: string, playerId: number) {
     const tnId = this.findTournamentIdByName(tnName) ;
     this.tournois[tnId].registeredPlayers[playerId].status = 'dropped' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[playerId].playerID)].status = 'dropped' ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
@@ -1408,17 +1352,13 @@ export class TournoiService {
   rehabPlayer(tnName: string, playerId: number) {
     const tnId = this.findTournamentIdByName(tnName) ;
     this.tournois[tnId].registeredPlayers[playerId].status = 'active' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[playerId].playerID)].status = 'active' ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
   setFixedTable(tnName: string, playerId: number, table: string){
     const tnId = this.findTournamentIdByName(tnName) ;
-    const id = playerId ;
-
-    this.tournois[tnId].registeredPlayers[id].fixedOnTable = table ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[id].playerID)].fixedOnTable = table ;
+    this.tournois[tnId].registeredPlayers[playerId].fixedOnTable = table ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
@@ -1426,17 +1366,18 @@ export class TournoiService {
   removeFixedTable(tnName: string, pId: number){
     const tnId = this.findTournamentIdByName(tnName) ;
     this.tournois[tnId].registeredPlayers[pId].fixedOnTable = 'none' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].fixedOnTable = 'none' ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
   lockFinalPlayers(tnName: string){
     const tnId = this.findTournamentIdByName(tnName) ;
-    for (let i = 0 ; i <  this.tournois[tnId].currentStanding.length ; i++)
+    const tournamentStandings: Joueur[] = this.getStandings(this.tournois[tnId].registeredPlayers) ;
+
+    for (let i = 0 ; i < tournamentStandings.length ; i++)
     {
       if (i >= this.tournois[tnId].tournamentCut)
-      { this.tournois[tnId].currentStanding[i].status = 'dropped' ; }
+      { this.tournois[tnId].registeredPlayers[tournamentStandings[i].playerIndexInEvent].status = 'dropped' ; }
     }
     this.saveTournoi() ;
     this.emitTournois() ;
@@ -1466,46 +1407,34 @@ export class TournoiService {
 
   setDecklist(tnId: number, pId: number, decklist: string){
     this.tournois[tnId].registeredPlayers[pId].decklist = decklist ;
+
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
-  setCommander(tnId: number, pId: number, commander: string, url: any, origin: number){
+  setCommander(tnId: number, pId: number, commander: string, url: any){
     this.tournois[tnId].registeredPlayers[pId].commander = commander ;
-    if (origin !== 0)
-    { this.updateStandingFromScratch(this.tournois[tnId].tournamentName) ; }
-    this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
-  setCommanderImg(tnId: number,pId: number, commander: string, url: any, origin: number){
+  setCommanderImg(tnId: number,pId: number, commander: string, url: any){
     this.tournois[tnId].registeredPlayers[pId].commanderImgUrl = url.toString() ;
-    if (origin !== 0)
-    { this.updateStandingFromScratch(this.tournois[tnId].tournamentName) ; }
-    this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
-  setPartner(tnId: number, pId: number, partner: string, url: any, origin: number){
+  setPartner(tnId: number, pId: number, partner: string, url: any){
     this.tournois[tnId].registeredPlayers[pId].partner = partner ;
     this.tournois[tnId].registeredPlayers[pId].partnerImgUrl = url.toString() ;
-
-    if (origin !== 0)
-    { this.updateStandingFromScratch(this.tournois[tnId].tournamentName) ; }
-    this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
 
-  setPartnerImg(tnId: number,pId: number, commander: string, url: any, origin: number){
+  setPartnerImg(tnId: number,pId: number, commander: string, url: any){
     this.tournois[tnId].registeredPlayers[pId].partnerImgUrl = url.toString() ;
     if (this.tournois[tnId].registeredPlayers[pId].commander.localeCompare(this.tournois[tnId].registeredPlayers[pId].partner) > 0)
     { this.sortCommanders(tnId, pId) ; }
-    if (origin !== 0)
-    { this.updateStandingFromScratch(this.tournois[tnId].tournamentName) ; }
-    this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
     this.emitTournois() ;
   }
@@ -1528,11 +1457,6 @@ export class TournoiService {
     this.tournois[tnId].registeredPlayers[pId].partner = '' ;
     this.tournois[tnId].registeredPlayers[pId].partnerImgUrl = null ;
 
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].commander = 'x' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].commanderImgUrl = 'x' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].partner = '' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].partnerImgUrl = null ;
-
     this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
     this.emitTournois() ;
@@ -1541,9 +1465,6 @@ export class TournoiService {
   resetPartner(tnId: number, pId: number){
     this.tournois[tnId].registeredPlayers[pId].partner = '' ;
     this.tournois[tnId].registeredPlayers[pId].partnerImgUrl = null ;
-
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].partner = '' ;
-    this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].registeredPlayers[pId].playerID)].partnerImgUrl = null ;
 
     this.refreshPlayersInMatches(tnId) ;
     this.saveTournoi() ;
@@ -1627,7 +1548,6 @@ export class TournoiService {
     }
 
     this.tournois[tnId].registeredPlayers.push(tempPlayer) ;
-    this.tournois[tnId].currentStanding.push(tempPlayer) ;
     this.tournois[tnId].currentMatches.push(new Match(tempPlayer, this.createBye())) ;
     this.tournois[tnId].currentMatches[this.tournois[tnId].currentMatches.length - 1].table = "*** bye ***" ;
     this.checkByes(tnId) ;
@@ -1647,13 +1567,11 @@ export class TournoiService {
     {
       playerID = this.tournois[tnId].currentMatches[matchID].joueur1.playerIndexInEvent ;
       this.tournois[tnId].currentMatches[matchID].joueur1.warnings.push(penalty) ;
-      this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].currentMatches[matchID].joueur2.playerID)].warnings.push(penalty) ;
     }
     else
     {
       playerID = this.tournois[tnId].currentMatches[matchID].joueur2.playerIndexInEvent ;
       this.tournois[tnId].currentMatches[matchID].joueur2.warnings.push(penalty) ;
-      this.tournois[tnId].currentStanding[this.findPlayerInStandings(tnId, this.tournois[tnId].currentMatches[matchID].joueur2.playerID)].warnings.push(penalty) ;
     }
 
     this.tournois[tnId].registeredPlayers[playerID].warnings.push(penalty) ;
@@ -1707,20 +1625,6 @@ export class TournoiService {
     return tnId ;
   }
 
-  findPlayerInStandings(tnId: number, pId: string){
-
-    let idToGet: number ;
-    for (let i = 0 ; i < this.tournois[tnId].currentStanding.length ; i++)
-    {
-      if (this.tournois[tnId].currentStanding[i].playerID === pId)
-      {
-        idToGet = i ;
-        i = this.tournois[tnId].currentStanding.length ;
-      }
-    }
-    return idToGet ;
-  }
-
   listeDesJoueursParOrdreAlphabetique(tnName: string){
     const tnId = this.findTournamentIdByName(tnName) ;
 
@@ -1750,11 +1654,6 @@ export class TournoiService {
 
           if (this.tournois[i].isLive)
           {
-            let pId = this.findPlayerInStandings(i, joueur.playerID) ;
-            this.tournois[i].currentStanding[pId].firstName = joueur.firstName ;
-            this.tournois[i].currentStanding[pId].lastName = joueur.lastName ;
-            this.tournois[i].currentStanding[pId].nickname = joueur.nickname ;
-
             for (let z = 0 ; z < this.tournois[i].currentMatches.length ; z++)
             {
               if (this.tournois[i].currentMatches[z].joueur1.playerID === joueur.playerID)

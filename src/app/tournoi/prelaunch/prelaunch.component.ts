@@ -95,7 +95,6 @@ export class PrelaunchComponent implements OnInit {
     const decklist = this.formDecklist.get('decklist').value ;
     this.tournoi.registeredPlayers[pId].decklist = decklist ;
     this.tournoiService.setDecklist(this.tournoi.tournamentId, pId, decklist) ;
-    this.tournoiService.updateStandingFromScratch(this.tournoi.tournamentName) ;
     this.toggleDecklistInput = -1 ;
   }
 
@@ -138,30 +137,29 @@ export class PrelaunchComponent implements OnInit {
     const commander = this.formDecklist.get('commander').value ;
     const commanderForUrl = commander.replace(/\s+/g, '+') ;
     let url: any = '' ;
-    let requestUrl = 'https://api.scryfall.com/cards/search?q=' + commanderForUrl ;
+    const requestUrl = 'https://api.scryfall.com/cards/search?q=' + commanderForUrl ;
 
     this.http.get(requestUrl).subscribe(urlResult => {
       this.urlResult = urlResult ;
       url = this.urlResult.data[0]['image_uris']['art_crop'] ;
       this.tournoi.registeredPlayers[pId].commander = commander ;
       this.tournoi.registeredPlayers[pId].commanderImgUrl = url ;
-      this.tournoiService.setCommander(this.tournoi.tournamentId, pId, commander, url, 0) ;
+      this.tournoiService.setCommander(this.tournoi.tournamentId, pId, commander, url) ;
       this.setCmdImg(pId, commander) ;
     }) ;
 
     this.onToggleCommander(-1) ;
   }
 
-  setCmdImg(pId: number, cmd: string){
+  setCmdImg(pId: number, cmd: string): void{
 
     let url: any = '' ;
-    let requestUrl = 'https://api.scryfall.com/cards/search?q=' + cmd ;
-    console.log('img ' + cmd) ;
+    const requestUrl = 'https://api.scryfall.com/cards/search?q=' + cmd ;
     this.http.get(requestUrl).subscribe(urlResult => {
       this.urlResult = urlResult ;
       url = this.urlResult.data[0]['image_uris']['art_crop'] ;
       this.tournoi.registeredPlayers[pId].commanderImgUrl = url ;
-      this.tournoiService.setCommanderImg(this.tournoi.tournamentId, pId, cmd, url, 0) ;
+      this.tournoiService.setCommanderImg(this.tournoi.tournamentId, pId, cmd, url) ;
     }) ;
   }
 

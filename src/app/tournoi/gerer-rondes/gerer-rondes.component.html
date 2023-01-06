@@ -146,15 +146,27 @@
   </div>
   <div class="col-md-3">
     <div *ngIf="displayDeckCheckOptions === true">
-      <h4>Options de deckcheck :</h4>
-      <button class="btn btn-dark" (click)="onGetDeckCheckAtRandom()">Table au hasard</button>
-      <form [formGroup]="formDeckCheck">
-        <div class="form-group">
-          <input type="number" class="form-control score" id="tableToCheck" formControlName="tableToCheck">
-          <button class="btn btn-success" (click)="onDeckCheckSpecificTable()">Valider</button>
-        </div>
-      </form>
-      <hr/>
+      <div>
+        <h4>Options de deckcheck :</h4>
+        <button class="btn btn-dark" (click)="onGetDeckCheckAtRandom()">Table au hasard</button>
+        <form [formGroup]="formDeckCheck">
+          <div class="form-group">
+            <input type="number" class="form-control score" id="tableToCheck" formControlName="tableToCheck">
+            <button class="btn btn-success" (click)="onDeckCheckSpecificTable()">Valider</button>
+          </div>
+        </form>
+      </div>
+      <div>
+        <form [formGroup]="formGetDeckLists">
+          <div class="form-group">
+            <input type="number" class="form-control score" id="getDeckFromTable" formControlName="getDeckFromTable">
+            <button class="btn btn-success" (click)="displayDecklistsLinks()">Valider</button>
+          </div>
+        </form>
+        <a href="{{ this.dl1 }}" target="_blank">{{ decklistj1.firstName }} {{ decklistj1.lastName }}</a><br/>
+        <a href="{{ this.dl2 }}" target="_blank">{{ decklistj2.firstName }} {{ decklistj2.lastName }}</a>
+      </div>
+     <hr/>
     </div>
     <h4>Résultats :</h4>
     <hr/>

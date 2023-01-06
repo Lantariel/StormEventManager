@@ -15,6 +15,8 @@ export class Match {
   /* Composants du match */
   public joueur1: Joueur ; // Joueur 1 au sein du match
   public joueur2: Joueur ; // Joueur 2 au sein du match
+  public IDJ1: number ; // ID du joueur 1 dans le tournoi
+  public IDJ2: number ; // ID du joueur 2 dans le tournoi
 
   constructor(jo1: Joueur, jo2: Joueur) {
     this.scoreAlreadySubmitted = false ;

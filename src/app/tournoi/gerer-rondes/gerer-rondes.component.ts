@@ -5,7 +5,7 @@ import {Joueur} from '../../models/joueur.model';
 import {ActivatedRoute, Router} from '@angular/router';
 import {TournoiService} from '../../services/tournoi.service';
 import {JoueurService} from '../../services/joueur.service';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
+import {Form, FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Ronde} from '../../models/ronde.model';
 import {MatchService} from '../../services/match.service';
 import {RondeService} from '../../services/ronde.service';
@@ -31,12 +31,18 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   formSearchForTable: FormGroup ;
   formAdditionalTime: FormGroup ;
   formDeckCheck: FormGroup ;
+  formGetDeckLists: FormGroup ;
 
   tableFocus: number;
   displayFinishedMatches: boolean;
   displayPenaltyForm: boolean ;
   displayCreateMatchesButton: boolean ;
   displayDeckCheckOptions: boolean ;
+
+  decklistj1: Joueur ;
+  decklistj2: Joueur ;
+  dl1 : string ;
+  dl2: string ;
 
   rondeActuelle: Ronde ;
   roundNumber: number ;
@@ -77,6 +83,11 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     this.displayPenaltyForm = false ;
     this.displayDeckCheckOptions = false ;
 
+    this.decklistj1 = null ;
+    this.decklistj2 = null ;
+    this.dl1 = null ;
+    this.dl2 = null ;
+
     this.initForm();
   }
 
@@ -107,6 +118,10 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     this.formDeckCheck = this.formBuilder.group({
       tableToCheck: ['', Validators.required]
     }) ;
+
+    this.formGetDeckLists = this.formBuilder.group({
+      getDeckFromTable: ['', Validators.required]
+    }) ;
   }
 
   /* === GESTION DES RONDES === */
@@ -115,7 +130,6 @@ export class GererRondesComponent implements OnInit, OnDestroy {
     this.tournoi.rondes.push(new Ronde(this.tournoi.tournamentName, this.tournoi.rondeEnCours + 1)) ;
     this.tournoiService.lockMatchResults(this.tournoi.tournamentName) ;
     this.tournoiService.updateWinRates(this.tournoi.tournamentName) ;
-    this.tournoiService.calculerClassement(this.tournoi.tournamentName) ;
     this.tournoiService.goToNexRound(this.tournoi.tournamentName) ;
 
     if (this.roundNumber === this.tournoi.nombreDeRondes)
@@ -335,17 +349,11 @@ export class GererRondesComponent implements OnInit, OnDestroy {
   /* === ===  */
 
   toogleDisplayMatches() {
-    if (this.displayFinishedMatches === true)
-    { this.displayFinishedMatches = false; }
-    else
-    { this.displayFinishedMatches = true; }
+    this.displayFinishedMatches = this.displayFinishedMatches !== true;
   }
 
   toogleDisplayPenaltyPannel(){
-    if (this.displayPenaltyForm === true)
-    { this.displayPenaltyForm = false ; }
-    else
-    { this.displayPenaltyForm = true ; }
+    this.displayPenaltyForm = this.displayPenaltyForm !== true;
   }
 
   compareValues(val1: number, val2: number) {
@@ -370,6 +378,14 @@ export class GererRondesComponent implements OnInit, OnDestroy {
 
   playersHasPartner(joueur: Joueur){
     return joueur.partner !== null;
+  }
+
+  displayDecklistsLinks(){
+    const match = this.formGetDeckLists.get('getDeckFromTable').value - 1;
+    this.decklistj1 = this.tournoi.currentMatches[match].joueur1 ;
+    this.decklistj2 = this.tournoi.currentMatches[match].joueur2 ;
+    this.dl1 = this.decklistj1.decklist ;
+    this.dl2 = this.decklistj2.decklist ;
   }
 
   ngOnDestroy() {
